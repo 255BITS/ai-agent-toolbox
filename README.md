@@ -2,24 +2,16 @@
 
 TODO LOGO
 
-AI Agent Toolbox is a set of tools that allow for easy AI Tool usage across models and frameworks. While the focus is on AI agents, AI Agent Toolbox works for any use case that requires Tool use.
+AI Agent Toolbox(AAT) makes AI tool usage across models and frameworks easy. AAT works for parsing single use responses, or in agent and workflow loops.
 
 ## Features
 
 * Native support protocols such as Anthropic MCP(link)
 * Robust parsing
-* Support for write-only tools and also tools that use responses
+* Streaming support
+* Support for read-write and write-only tools
 * Framework compatible
 * Model provider-agnostic - supports Anthropic, OpenAI, Groq, Ollama, Hyperbolic, NanoGPT, and more
-
-## Comparison
-
-| Feature | AI Agent Toolbox | Raw Provider Tools | Other Solutions |
-|---------|-----------------|-------------------|-----------------|
-| Cross-platform | ✅ | ❌ | Varies |
-| Native Support | ✅ | ✅ | ❌ |
-| Read-Write Tools | ✅ | Varies | ❌ |
-| Streaming | ✅ | Varies | ❌ |
 
 ## Installation
 
