@@ -109,7 +109,7 @@ OpenAI uses swagger definitions. You can support native OpenAI tooling as follow
 #TODO
 ```
 
-#### Native tooling
+#### Local tooling
 
 This supports other providers and open source models. Here you parse the results yourself.
 
