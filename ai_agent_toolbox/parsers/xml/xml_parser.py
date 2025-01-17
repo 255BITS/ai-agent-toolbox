@@ -1,27 +1,28 @@
 import uuid
 from typing import List, Dict, Any, Optional
 
-from app.llm.tool_parser import ToolParser, ToolParserState
+from .tool_parser import ToolParser, ToolParserState
 
 class ParserState:
     """
-    Enumeration for the StreamParser's top-level states.
+    Enumeration for the XMLParser's top-level states.
     """
     OUTSIDE = "outside"
     INSIDE_TOOL = "inside_tool"
 
-class StreamParser:
+class XMLParser:
     """
-    The StreamParser only handles text outside any <use_tool> block...
+    The XMLParser only handles text outside any <use_tool> block...
     """
 
-    def __init__(self):
+    def __init__(self, tag="tool"):
         self.state = ParserState.OUTSIDE
         self.events: List[Dict[str, Any]] = []
 
         self.current_text_id: Optional[str] = None
         self.outside_buffer: str = ""
         self.tool_parser: Optional[ToolParser] = None
+        self.tag = tag
 
     def parse(self, chunk: str) -> List[Dict[str, Any]]:
         self.events = []
