@@ -7,7 +7,7 @@ from anthropic import Anthropic
 toolbox = Toolbox()
 parser = XMLParser(tag="use_tool")
 
-async def thinking(thoughts=""):
+def thinking(thoughts=""):
     pass
 
 # Adding tools to your toolbox
@@ -26,7 +26,10 @@ toolbox.add_tool(
 system = "You are a thinking AI. You have interesting thoughts."
 prompt = "Think about something interesting."
 response = anthropic_llm_call(system_prompt=system, prompt=prompt)
-tool_results = toolbox.parse(response)
-tool_result = tool_results[0]
+events = parser.parse(response)
 
-print("Thinking called with:", tool_result["thoughts"])
+for event in events:
+    if event.is_tool_call:
+        result = toolbox.use(event.name, event.args)
+
+print("Thinking called with:", result["thoughts"])
