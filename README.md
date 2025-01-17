@@ -34,23 +34,61 @@ from ai_agent_toolbox.parsers import XMLParser
 toolbox = Toolbox()
 parser = XMLParser(tag="use_tool")
 
+async def thinking(thoughts=""):
+    print("I am thinking: "+thoughts)
+
 # Adding tools to your toolbox
 toolbox.add_tool(
     name="thinking",
-    args={"thoughts": "str"},
+    fn=thinking,
+    args={
+        "thoughts": {
+            "type": str,
+            "description": "Anything you want to think about"
+        }
+    },
     description="For thinking out loud"
 )
 
 #TODO anthropic code and setting prompt
 async for event in parser.stream(ai_response):
     if event.is_tool_call:
-        await toolbox.use(event)
+        tool_result = await toolbox.use(event.name, event.args)
+print("thinking called with", tool_result["thoughts"])
 ```
 
 ### Synchronous
 
 ```python
-#TODO
+from ai_agent_toolbox import Toolbox
+from ai_agent_toolbox.tools import Tool
+from ai_agent_toolbox.parsers import XMLParser
+
+# Your workbench setup
+toolbox = Toolbox()
+parser = XMLParser(tag="use_tool")
+
+def thinking(thoughts=""):
+    print("I am thinking: "+thoughts)
+
+# Adding tools to your toolbox
+toolbox.add_tool(
+    name="thinking",
+    fn=thinking,
+    args={
+        "thoughts": {
+            "type": str,
+            "description": "Anything you want to think about"
+        }
+    },
+    description="For thinking out loud"
+)
+
+#TODO anthropic code and setting prompt
+for event in parser.parse(ai_response):
+    if event.is_tool_call:
+        tool_result = toolbox.use(event.name, event.args)
+print("thinking called with", tool_result["thoughts"])
 ```
 
 ### Native Providers

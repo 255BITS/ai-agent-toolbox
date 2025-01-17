@@ -1,0 +1,24 @@
+name: Deploy Documentation
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/**'  # Only trigger on docs changes
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+      - name: Install dependencies
+        run: |
+          cd docs
+          pip install -r requirements.txt
+      - name: Deploy docs
+        run: |
+          cd docs
+          mkdocs gh-deploy --force
