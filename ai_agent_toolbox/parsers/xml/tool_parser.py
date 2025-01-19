@@ -1,15 +1,7 @@
 import re
 import uuid
-from typing import List, Optional
-from dataclasses import dataclass
-
-@dataclass
-class ToolEvent:
-    type: str                   # e.g., "tool"
-    is_tool_call: bool          # True when it's a tool-related event
-    mode: str                   # e.g., "create", "append", "close"
-    id: str                     # Unique ID for the tool call
-    content: Optional[str] = None  # Additional content, e.g. tool name or arg text
+from typing import Optional
+from ai_agent_toolbox.event import Event
 
 class ToolParserState:
     """
@@ -36,7 +28,7 @@ class ToolParser:
 
         # Buffer to accumulate everything that belongs inside this single <tag> block
         self.buffer: str = ""
-        self.events: List[ToolEvent] = []
+        self.events: List[Event] = []
 
         # Current tool info
         self.current_tool_id: Optional[str] = None
@@ -47,11 +39,11 @@ class ToolParser:
         self.end_tag = "</" + tag + ">"
         self.start_tag = "<" + tag + ">"
 
-    def parse(self, chunk: str) -> (List[ToolEvent], bool, str):
+    def parse(self, chunk: str) -> (List[Event], bool, str):
         """
         Parse incoming chunk for a single <tag> block.
         Returns (events, done, leftover):
-          - events: newly generated ToolEvent objects
+          - events: newly generated Event objects
           - done: True if we found </tag> and finalized
           - leftover: text after </tag>, which belongs outside this tool
         """
@@ -211,7 +203,7 @@ class ToolParser:
     def _create_tool(self, name: str):
         self.current_tool_id = str(uuid.uuid4())
         self.current_tool_name = name
-        self.events.append(ToolEvent(
+        self.events.append(Event(
             type="tool",
             is_tool_call=True,
             mode="create",
@@ -229,7 +221,7 @@ class ToolParser:
         if self.current_tool_id and self.current_arg_name and text:
             # Combine arg name + text into the content field.
             content_str = f"[{self.current_arg_name}] {text}"
-            self.events.append(ToolEvent(
+            self.events.append(Event(
                 type="tool",
                 is_tool_call=True,
                 mode="append",
@@ -245,7 +237,7 @@ class ToolParser:
         """Emit a close event and reset tool state."""
         self._close_tool_arg()
         if self.current_tool_id:
-            self.events.append(ToolEvent(
+            self.events.append(Event(
                 type="tool",
                 is_tool_call=True,
                 mode="close",
