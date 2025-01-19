@@ -4,7 +4,7 @@ from typing import List, Dict, Any, Optional
 
 class ToolParserState:
     """
-    Enumeration for parsing states within <use_tool> content.
+    Enumeration for parsing states within <tag> content.
     """
     WAITING_FOR_NAME = "waiting_for_name"
     HAS_NAME = "has_name"
@@ -12,20 +12,20 @@ class ToolParserState:
 
 class ToolParser:
     """
-    Dedicated parser for <use_tool>...</use_tool> blocks. It:
+    Dedicated parser for <tag>...</tag> blocks. It:
       - Grabs the <name>...</name> to identify which tool is invoked
       - Handles arbitrary <argName>...</argName> tags
-      - Stops after </use_tool> is found, returning leftover text
+      - Stops after </tag> is found, returning leftover text
     """
 
     NAME_BLOCK_REGEX = re.compile(r"<name>(.*?)</name>", flags=re.DOTALL)
     ARG_OPEN_REGEX = re.compile(r"<(\w+)>")
     ARG_CLOSE_REGEX = re.compile(r"</(\w+)>")
 
-    def __init__(self):
+    def __init__(self, tag):
         self.state = ToolParserState.WAITING_FOR_NAME
 
-        # Buffer to accumulate everything that belongs inside this single <use_tool> block
+        # Buffer to accumulate everything that belongs inside this single <tag> block
         self.buffer: str = ""
         self.events: List[Dict[str, Any]] = []
 
@@ -33,14 +33,17 @@ class ToolParser:
         self.current_tool_id: Optional[str] = None
         self.current_tool_name: Optional[str] = None
         self.current_arg_name: Optional[str] = None
+        self.tag = tag
+        self.end_tag = "</"+tag+">"
+        self.start_tag = "<"+tag+">"
 
     def parse(self, chunk: str) -> (List[Dict[str, Any]], bool, str):
         """
-        Parse incoming chunk for a single <use_tool> block.
+        Parse incoming chunk for a single <tag> block.
         Returns (events, done, leftover):
           - events: newly generated events from this parse
-          - done: True if we found </use_tool> and finalized
-          - leftover: text after </use_tool>, which belongs outside this tool
+          - done: True if we found </tag> and finalized
+          - leftover: text after </tag>, which belongs outside this tool
         """
         self.events = []  # reset for each parse call
         self.buffer += chunk
@@ -99,13 +102,13 @@ class ToolParser:
     # --------------------------------------------------------------------------
     def _parse_has_name(self):
         """
-        We have a tool. Now look for arguments or the </use_tool> close tag.
-        If we see partial </use_tool> (like '</us'), store it in the buffer.
+        We have a tool. Now look for arguments or the </tag> close tag.
+        If we see partial </tag> (like '</us'), store it in the buffer.
         """
-        close_pos = self.buffer.find("</use_tool>")
+        close_pos = self.buffer.find(self.end_tag)
         if close_pos == -1:
-            # Check if we have a partial prefix of </use_tool>
-            partial_prefix = self._partial_prefix(self.buffer, "</use_tool>")
+            # Check if we have a partial prefix of </tag>
+            partial_prefix = self._partial_prefix(self.buffer, self.end_tag)
             if partial_prefix:
                 # Everything before that partial prefix is valid tool-arg text
                 text_before_partial = self.buffer[:-len(partial_prefix)]
@@ -113,16 +116,16 @@ class ToolParser:
                 # Keep the partial prefix; wait for more data
                 self.buffer = partial_prefix
             else:
-                # No sign of </use_tool> => treat entire buffer as arg text
+                # No sign of </tag> => treat entire buffer as arg text
                 self._parse_tool_arguments(self.buffer)
                 self.buffer = ""
         else:
-            # We found a full </use_tool>
+            # We found a full </tag>
             inside_text = self.buffer[:close_pos]
             self._parse_tool_arguments(inside_text)
 
-            # Remove the </use_tool> tag
-            end_of_tag = close_pos + len("</use_tool>")
+            # Remove the </tag> tag
+            end_of_tag = close_pos + len(self.end_tag)
             self.buffer = self.buffer[end_of_tag:]
 
             # Finalize
@@ -168,8 +171,8 @@ class ToolParser:
                 current_pos += len(open_m.group(0))
                 continue
 
-            # If it's </use_tool>, we ignore it here, _parse_has_name handles it
-            if maybe_tag.startswith("</use_tool>"):
+            # If it's </tag>, we ignore it here, _parse_has_name handles it
+            if maybe_tag.startswith("</tag>"):
                 break
 
             # Unknown tag => treat the first '<' as literal
@@ -183,7 +186,7 @@ class ToolParser:
         """
         Returns the longest trailing substring of `text` that is a prefix
         of `pattern`. For instance:
-          text="...</us" and pattern="</use_tool>" => returns "</us"
+          text="...</us" and pattern="</tag>" => returns "</us"
           text="...</use_to" => returns "</use_to"
         """
         max_len = min(len(text), len(pattern) - 1)
@@ -238,5 +241,5 @@ class ToolParser:
         self.current_tool_name = None
 
     def is_done(self) -> bool:
-        """True if we've encountered </use_tool>."""
+        """True if we've encountered </tag>."""
         return self.state == ToolParserState.DONE

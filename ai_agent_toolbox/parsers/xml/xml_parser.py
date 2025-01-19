@@ -21,8 +21,7 @@ class XMLParser:
 
         self.current_text_id: Optional[str] = None
         self.outside_buffer: str = ""
-        self.tool_parser: Optional[ToolParser] = None
-        self.tag = tag
+        self.tool_parser = ToolParser(tag=tag)
 
     def parse(self, chunk: str) -> List[Dict[str, Any]]:
         self.events = []
@@ -64,7 +63,6 @@ class XMLParser:
 
             # Advance past <use_tool>, parse the remainder with ToolParser
             combined = combined[use_idx + len("<use_tool>"):]
-            self.tool_parser = ToolParser()
 
             new_events, done, leftover = self.tool_parser.parse(combined)
             self.events.extend(new_events)
