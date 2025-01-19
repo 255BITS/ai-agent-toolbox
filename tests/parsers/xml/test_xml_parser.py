@@ -52,6 +52,7 @@ def test_basic_tool_parsing(parser):
     More text"""
     
     events = list(parser.parse(input_text))
+    events += parser.flush()
     
     # Expect sequence:
     # 1. text create

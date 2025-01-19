@@ -1,6 +1,15 @@
 import re
 import uuid
-from typing import List, Dict, Any, Optional
+from typing import List, Optional
+from dataclasses import dataclass
+
+@dataclass
+class ToolEvent:
+    type: str                   # e.g., "tool"
+    is_tool_call: bool          # True when it's a tool-related event
+    mode: str                   # e.g., "create", "append", "close"
+    id: str                     # Unique ID for the tool call
+    content: Optional[str] = None  # Additional content, e.g. tool name or arg text
 
 class ToolParserState:
     """
@@ -22,26 +31,27 @@ class ToolParser:
     ARG_OPEN_REGEX = re.compile(r"<(\w+)>")
     ARG_CLOSE_REGEX = re.compile(r"</(\w+)>")
 
-    def __init__(self, tag):
+    def __init__(self, tag: str):
         self.state = ToolParserState.WAITING_FOR_NAME
 
         # Buffer to accumulate everything that belongs inside this single <tag> block
         self.buffer: str = ""
-        self.events: List[Dict[str, Any]] = []
+        self.events: List[ToolEvent] = []
 
         # Current tool info
         self.current_tool_id: Optional[str] = None
         self.current_tool_name: Optional[str] = None
         self.current_arg_name: Optional[str] = None
-        self.tag = tag
-        self.end_tag = "</"+tag+">"
-        self.start_tag = "<"+tag+">"
 
-    def parse(self, chunk: str) -> (List[Dict[str, Any]], bool, str):
+        self.tag = tag
+        self.end_tag = "</" + tag + ">"
+        self.start_tag = "<" + tag + ">"
+
+    def parse(self, chunk: str) -> (List[ToolEvent], bool, str):
         """
         Parse incoming chunk for a single <tag> block.
         Returns (events, done, leftover):
-          - events: newly generated events from this parse
+          - events: newly generated ToolEvent objects
           - done: True if we found </tag> and finalized
           - leftover: text after </tag>, which belongs outside this tool
         """
@@ -201,12 +211,13 @@ class ToolParser:
     def _create_tool(self, name: str):
         self.current_tool_id = str(uuid.uuid4())
         self.current_tool_name = name
-        self.events.append({
-            "type": "tool",
-            "mode": "create",
-            "id": self.current_tool_id,
-            "tool_name": name
-        })
+        self.events.append(ToolEvent(
+            type="tool",
+            is_tool_call=True,
+            mode="create",
+            id=self.current_tool_id,
+            content=name
+        ))
 
     def _start_tool_arg(self, arg_name: str):
         """Open a new argument, closing any previous one."""
@@ -216,13 +227,15 @@ class ToolParser:
     def _append_tool_arg(self, text: str):
         """Emit partial argument text for the currently open arg (if any)."""
         if self.current_tool_id and self.current_arg_name and text:
-            self.events.append({
-                "type": "tool",
-                "mode": "append",
-                "id": self.current_tool_id,
-                "arg": self.current_arg_name,
-                "content": text
-            })
+            # Combine arg name + text into the content field.
+            content_str = f"[{self.current_arg_name}] {text}"
+            self.events.append(ToolEvent(
+                type="tool",
+                is_tool_call=True,
+                mode="append",
+                id=self.current_tool_id,
+                content=content_str
+            ))
 
     def _close_tool_arg(self):
         """Close the currently open arg."""
@@ -232,11 +245,12 @@ class ToolParser:
         """Emit a close event and reset tool state."""
         self._close_tool_arg()
         if self.current_tool_id:
-            self.events.append({
-                "type": "tool",
-                "mode": "close",
-                "id": self.current_tool_id
-            })
+            self.events.append(ToolEvent(
+                type="tool",
+                is_tool_call=True,
+                mode="close",
+                id=self.current_tool_id
+            ))
         self.current_tool_id = None
         self.current_tool_name = None
 
