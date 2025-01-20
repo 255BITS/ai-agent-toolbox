@@ -23,12 +23,10 @@ def assert_text_close(event, text_id):
     assert event.mode == "close"
     assert event.id == text_id
 
-def assert_tool_create(event, expected_tool_name=None):
+def assert_tool_create(event):
     assert event.type == "tool"
     assert event.mode == "create"
     assert event.id is not None
-    if expected_tool_name:
-        assert event.tool_name == expected_tool_name
 
 def assert_tool_append(event, tool_id, arg, content):
     assert event.type == "tool"
@@ -37,10 +35,12 @@ def assert_tool_append(event, tool_id, arg, content):
     assert event.arg == arg
     assert event.content == content
 
-def assert_tool_close(event, tool_id):
+def assert_tool_close(event, tool_id, expected_tool_name=None):
     assert event.type == "tool"
     assert event.mode == "close"
     assert event.id == tool_id
+    if expected_tool_name:
+        assert event.tool.name == expected_tool_name
 
 def test_basic_tool_parsing(parser):
     """Test parsing a single complete tool use."""
@@ -52,7 +52,6 @@ def test_basic_tool_parsing(parser):
     More text"""
     
     events = list(parser.parse(input_text))
-    events += parser.flush()
     
     # Expect sequence:
     # 1. text create
@@ -74,7 +73,7 @@ def test_basic_tool_parsing(parser):
     assert_text_close(events[2], text_id_1)
     
     # Tool block
-    assert_tool_create(events[3], "thinking")
+    assert_tool_create(events[3])
     tool_id = events[3].id
     assert_tool_append(events[4], tool_id, "thoughts", "test thoughts")
     assert_tool_close(events[5], tool_id)
@@ -94,9 +93,8 @@ def test_streaming_partial_tool(parser):
     chunk1 = """Some text <use_tool><name>thinking</name><thou"""
     chunk2 = """ghts>test thoughts</thoughts></use_tool> More text"""
     
-    events1 = list(parser.parse(chunk1))
-    events2 = list(parser.parse(chunk2))
-    events3 = list(parser.flush())
+    events1 = list(parser.parse_chunk(chunk1))
+    events2 = list(parser.parse_chunk(chunk2))
     
     # First chunk should produce:
     # 1. text create
@@ -139,7 +137,6 @@ def test_multiple_tools(parser):
     """
     
     events = list(parser.parse(input_text))
-    events.extend(parser.flush())
     
     # Verify both tools are parsed correctly
     tool_events = [e for e in events if e.is_tool_call]

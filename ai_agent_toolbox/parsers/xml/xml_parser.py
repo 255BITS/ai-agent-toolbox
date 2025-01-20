@@ -26,7 +26,10 @@ class XMLParser:
         self.outside_buffer: str = ""
         self.tool_parser = ToolParser(tag=tag)
 
-    def parse(self, chunk: str) -> List[ParserEvent]:
+    def parse(self, text: str) -> List[ParserEvent]:
+        return self.parse_chunk(text) + self.flush()
+
+    def parse_chunk(self, chunk: str) -> List[ParserEvent]:
         """
         Parse a chunk of text, returning a list of ParserEvent objects. 
         """
