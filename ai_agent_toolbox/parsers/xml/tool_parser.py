@@ -1,7 +1,7 @@
 import re
 import uuid
-from typing import Optional
-from ai_agent_toolbox.event import Event
+from typing import Optional, List
+from ai_agent_toolbox.parser_event import ParserEvent
 
 class ToolParserState:
     """
@@ -28,7 +28,7 @@ class ToolParser:
 
         # Buffer to accumulate everything that belongs inside this single <tag> block
         self.buffer: str = ""
-        self.events: List[Event] = []
+        self.events: List[ParserEvent] = []
 
         # Current tool info
         self.current_tool_id: Optional[str] = None
@@ -39,11 +39,11 @@ class ToolParser:
         self.end_tag = "</" + tag + ">"
         self.start_tag = "<" + tag + ">"
 
-    def parse(self, chunk: str) -> (List[Event], bool, str):
+    def parse(self, chunk: str) -> (List[ParserEvent], bool, str):
         """
         Parse incoming chunk for a single <tag> block.
         Returns (events, done, leftover):
-          - events: newly generated Event objects
+          - events: newly generated ParserEvent objects
           - done: True if we found </tag> and finalized
           - leftover: text after </tag>, which belongs outside this tool
         """
@@ -203,7 +203,7 @@ class ToolParser:
     def _create_tool(self, name: str):
         self.current_tool_id = str(uuid.uuid4())
         self.current_tool_name = name
-        self.events.append(Event(
+        self.events.append(ParserEvent(
             type="tool",
             is_tool_call=True,
             mode="create",
@@ -221,7 +221,7 @@ class ToolParser:
         if self.current_tool_id and self.current_arg_name and text:
             # Combine arg name + text into the content field.
             content_str = f"[{self.current_arg_name}] {text}"
-            self.events.append(Event(
+            self.events.append(ParserEvent(
                 type="tool",
                 is_tool_call=True,
                 mode="append",
@@ -237,7 +237,7 @@ class ToolParser:
         """Emit a close event and reset tool state."""
         self._close_tool_arg()
         if self.current_tool_id:
-            self.events.append(Event(
+            self.events.append(ParserEvent(
                 type="tool",
                 is_tool_call=True,
                 mode="close",
