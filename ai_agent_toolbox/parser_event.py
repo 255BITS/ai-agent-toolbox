@@ -1,16 +1,31 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional, Any, Dict
 
 @dataclass
 class ToolUse:
-    name: str                   # e.g., "thinking"
-    args: Dict[str, Any]        # e.g., {"thoughts": "Cogito, ergo sum"}
+    name: str
+    args: Dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class ParserEvent:
-    type: str                   # e.g., "tool"
-    mode: str                   # e.g., "create", "append", "close"
-    id: str                     # Unique ID for the tool call
-    tool: ToolUse = None        # e.g., "thinking"
-    is_tool_call: bool = False  # True when it's a tool-related event
-    content: Optional[str] = None  # Additional content, e.g. tool name or arg text
+    # 'type' will be either "text" or "tool"
+    type: str
+
+    # 'mode' is "create", "append", or "close"
+    mode: str
+
+    # Unique ID for the text or tool being tracked
+    id: str
+
+    # If this event is for a tool, store the final ToolUse object when closing.
+    tool: Optional[ToolUse] = None
+    
+    # For convenience, also store is_tool_call (True if type=="tool")
+    is_tool_call: bool = False
+
+    # Free-form content (e.g. a snippet of text or partial argument text)
+    content: Optional[str] = None
+
+    # For tool events, we can store partial argument data for each append, 
+    # or the final dictionary on close.
+    args: Dict[str, Any] = field(default_factory=dict)

@@ -32,7 +32,7 @@ def assert_tool_append(event, tool_id, arg, content):
     assert event.type == "tool"
     assert event.mode == "append"
     assert event.id == tool_id
-    assert event.arg == arg
+    assert event.args == {arg: content}
     assert event.content == content
 
 def assert_tool_close(event, tool_id, expected_tool_name=None):
@@ -40,6 +40,7 @@ def assert_tool_close(event, tool_id, expected_tool_name=None):
     assert event.mode == "close"
     assert event.id == tool_id
     if expected_tool_name:
+        assert event.tool is not None
         assert event.tool.name == expected_tool_name
 
 def test_basic_tool_parsing(parser):
