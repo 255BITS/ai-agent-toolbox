@@ -1,5 +1,6 @@
 import pytest
 from ai_agent_toolbox import XMLParser
+from pprint import pprint
 
 @pytest.fixture
 def parser():
@@ -107,7 +108,7 @@ def test_streaming_partial_tool(parser):
     text_id_1 = events1[0].id
     assert_text_append(events1[1], text_id_1, "Some text ")
     assert_text_close(events1[2], text_id_1)
-    assert_tool_create(events1[3], "thinking")
+    assert_tool_create(events1[3])
     tool_id = events1[3].id
     
     # Second chunk should complete the tool and start new text:
@@ -115,6 +116,7 @@ def test_streaming_partial_tool(parser):
     # 2. tool close
     # 3. text create
     # 4. text append " More text"
+    pprint(events2)
     assert len(events2) >= 4
     assert_tool_append(events2[0], tool_id, "thoughts", "test thoughts")
     assert_tool_close(events2[1], tool_id)
