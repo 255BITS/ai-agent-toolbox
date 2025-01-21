@@ -18,6 +18,9 @@ class FlatXMLParser:
         self.tags = list(tags)
 
     def parse(self, text: str):
+        return list(self.parse_chunk(text))
+
+    def parse_chunk(self, text: str):
         """
         Parses the entire text in one go, yielding ParserEvent objects.
         

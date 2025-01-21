@@ -50,4 +50,4 @@ def r1_llm_call(prompt: str, system_prompt: str = "", model: str = "deepseek-rea
         messages=messages
     )
 
-    return response.choices[0].message.content
+    return "<think>"+response.choices[0].message.reasoning_content+"</think>"+response.choices[0].message.content
