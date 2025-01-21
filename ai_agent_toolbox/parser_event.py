@@ -25,7 +25,3 @@ class ParserEvent:
 
     # Free-form content (e.g. a snippet of text or partial argument text)
     content: Optional[str] = None
-
-    # For tool events, we can store partial argument data for each append, 
-    # or the final dictionary on close.
-    args: Dict[str, Any] = field(default_factory=dict)

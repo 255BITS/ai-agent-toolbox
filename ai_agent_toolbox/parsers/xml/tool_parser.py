@@ -250,8 +250,7 @@ class ToolParser:
                     mode="append",
                     id=self.current_tool_id,
                     is_tool_call=False,
-                    content=text,
-                    args={self.current_arg_name: text}
+                    content=text
                 )
             )
 
@@ -271,9 +270,7 @@ class ToolParser:
                     tool=ToolUse(
                         name=self.current_tool_name,
                         args=self.current_tool_args.copy()
-                    ),
-                    # Also store the args dict at the top level for easy testing:
-                    args=self.current_tool_args.copy()
+                    )
                 )
             )
         self.current_tool_id = None

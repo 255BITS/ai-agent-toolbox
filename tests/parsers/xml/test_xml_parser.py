@@ -33,7 +33,6 @@ def assert_tool_append(event, tool_id, arg, content):
     assert event.type == "tool"
     assert event.mode == "append"
     assert event.id == tool_id
-    assert event.args == {arg: content}
     assert event.content == content
 
 def assert_tool_close(event, tool_id, expected_tool_name=None):
@@ -88,7 +87,7 @@ def test_basic_tool_parsing(parser):
     
     # Verify tool call accessibility
     assert events[5].is_tool_call
-    assert events[5].args == {"thoughts": "test thoughts"}
+    assert events[5].tool.args == {"thoughts": "test thoughts"}
 
 def test_streaming_partial_tool(parser):
     """Test parsing a tool split across multiple chunks."""
@@ -122,7 +121,7 @@ def test_streaming_partial_tool(parser):
     
     # Verify the complete tool is accessible
     assert events2[1].is_tool_call
-    assert events2[1].args == {"thoughts": "test thoughts"}
+    assert events2[1].tool.args == {"thoughts": "test thoughts"}
 
 def test_multiple_tools(parser):
     """Test parsing multiple tools in sequence."""
@@ -143,5 +142,5 @@ def test_multiple_tools(parser):
     # Verify both tools are parsed correctly
     tool_events = [e for e in events if e.is_tool_call]
     assert len(tool_events) == 2
-    assert tool_events[0].args == {"arg1": "value1"}
-    assert tool_events[1].args == {"arg2": "value2"}
+    assert tool_events[0].tool.args == {"arg1": "value1"}
+    assert tool_events[1].tool.args == {"arg2": "value2"}

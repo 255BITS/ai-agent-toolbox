@@ -1,7 +1,6 @@
 from ai_agent_toolbox import Toolbox
 from ai_agent_toolbox.tools import Tool
 from ai_agent_toolbox.parsers import XMLParser
-from anthropic import Anthropic
 
 # Your workbench setup
 toolbox = Toolbox()
