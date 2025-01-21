@@ -225,7 +225,7 @@ class ToolParser:
                 type="tool",
                 mode="create",
                 id=self.current_tool_id,
-                is_tool_call=True,
+                is_tool_call=False,
                 content=name
             )
         )
@@ -249,7 +249,7 @@ class ToolParser:
                     type="tool",
                     mode="append",
                     id=self.current_tool_id,
-                    is_tool_call=True,
+                    is_tool_call=False,
                     content=text,
                     args={self.current_arg_name: text}
                 )

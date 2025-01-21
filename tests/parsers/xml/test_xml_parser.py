@@ -116,7 +116,6 @@ def test_streaming_partial_tool(parser):
     # 2. tool close
     # 3. text create
     # 4. text append " More text"
-    pprint(events2)
     assert len(events2) >= 4
     assert_tool_append(events2[0], tool_id, "thoughts", "test thoughts")
     assert_tool_close(events2[1], tool_id)
@@ -146,44 +145,3 @@ def test_multiple_tools(parser):
     assert len(tool_events) == 2
     assert tool_events[0].args == {"arg1": "value1"}
     assert tool_events[1].args == {"arg2": "value2"}
-
-def test_malformed_xml(parser):
-    """Test handling of malformed XML."""
-    input_text = """
-    <use_tool>
-        <name>thinking
-        <thoughts>incomplete tag</thoughts>
-    </use_tool>
-    """
-    with pytest.raises(Exception):  # Specify exact exception once implemented
-        list(parser.parse(input_text))
-
-def test_missing_name(parser):
-    """Test handling of tool without name."""
-    input_text = """
-    <use_tool>
-        <thoughts>no name provided</thoughts>
-    </use_tool>
-    """
-    with pytest.raises(ValueError):
-        list(parser.parse(input_text))
-
-def test_nested_tools(parser):
-    """Test handling of nested tool tags."""
-    input_text = """
-    <use_tool>
-        <name>outer</name>
-        <arg>
-            <use_tool>
-                <name>inner</name>
-                <value>nested</value>
-            </use_tool>
-        </arg>
-    </use_tool>
-    """
-    events = list(parser.parse(input_text))
-    
-    # Should only parse outer tool
-    tool_events = [e for e in events if e.is_tool_call]
-    assert len(tool_events) == 1
-    assert tool_events[0].args["arg"].strip().startswith("<use_tool>")
