@@ -1,60 +1,72 @@
-from typing import Callable, Dict, Any
+from typing import Any, Callable, Dict, Optional
+from .parser_event import ParserEvent, ToolUse
 
 class Toolbox:
     """
-    Manages tools for an AI agent.
+    A straightforward toolbox that holds references to callable tools
+    and can generate a usage prompt for them.
     """
 
     def __init__(self):
-        self.tools: Dict[str, Dict[str, Any]] = {}
+        self._tools: Dict[str, Dict[str, Any]] = {}
 
-    def add_tool(self, name: str, args: Dict[str, str], description: str, func: Callable = None):
+    def add_tool(
+        self,
+        name: str,
+        fn: Callable[..., Any],
+        args: Dict[str, Any],
+        description: str = "",
+    ) -> None:
         """
-        Add a tool with its name, args, description, and optional behavior.
+        Register a tool with the given name, function, argument schema, and description.
         """
-        if name in self.tools:
-            raise ValueError(f"Tool '{name}' is already defined.")
-
-        self.tools[name] = {
+        self._tools[name] = {
+            "fn": fn,
             "args": args,
             "description": description,
-            "func": func or self.default_behavior,
         }
 
-    def default_behavior(self, **kwargs):
-        """Default behavior if no function is provided."""
-        return kwargs
+    def usage_prompt(self) -> str:
+        """
+        Generate a string describing how to invoke each tool and the schema for its arguments.
+        This can be appended to system prompts to guide an LLM on how to call these tools.
+        """
+        lines = []
+        lines.append("You can invoke the following tools using <use_tool>:")
+        for tool_name, data in self._tools.items():
+            lines.append(f"Tool name: {tool_name}")
+            lines.append(f"Description: {data['description']}")
+            lines.append("Arguments:")
+            for arg_name, arg_schema in data["args"].items():
+                arg_type = arg_schema.get("type", "string")
+                arg_desc = arg_schema.get("description", "")
+                lines.append(f"  {arg_name} ({arg_type}): {arg_desc}")
+            lines.append("")
 
-    def validate_args(self, name: str, **kwargs):
-        """Validate arguments for a given tool."""
-        if name not in self.tools:
-            raise ValueError(f"Tool '{name}' is not defined.")
+        lines.append("For example:")
+        lines.append("<use_tool>")
+        lines.append("    <name>tool_name</name>")
+        lines.append("    <arg1>value1</arg1>")
+        lines.append("    <arg2>value2</arg2>")
+        lines.append("</use_tool>")
 
-        tool_args = self.tools[name]["args"]
-        for arg_name, arg_type in tool_args.items():
-            if arg_name not in kwargs:
-                raise ValueError(f"Missing argument '{arg_name}' for tool '{name}'.")
+        return "\n".join(lines)
 
-            if not isinstance(kwargs[arg_name], eval(arg_type)):
-                raise ValueError(
-                    f"Argument '{arg_name}' must be of type '{arg_type}' for tool '{name}'."
-                )
-
-    def use(self, event):
-        """Use a tool based on the event."""
-        tool_name = event.tool_name
-        args = {arg_event.arg: arg_event.content for arg_event in event.args}
-
-        self.validate_args(tool_name, **args)
-        return self.tools[tool_name]["func"](**args)
-
-    def list_tools(self):
-        """List all tools with their descriptions."""
-        return {name: tool["description"] for name, tool in self.tools.items()}
-
-    def remove_tool(self, name: str):
-        """Remove a tool by name."""
-        if name not in self.tools:
-            raise ValueError(f"Tool '{name}' is not defined.")
-
-        del self.tools[name]
+    def use(self, event: ParserEvent) -> Optional[Any]:
+        """
+        If the event is a tool call, attempts to call the corresponding tool function
+        with the event's arguments. Returns the function result or None if not applicable.
+        """
+        if event.is_tool_call and event.tool is not None:
+            tool_name = event.tool.name
+            if tool_name in self._tools:
+                fn = self._tools[tool_name]["fn"]
+                try:
+                    return fn(**event.tool.args)
+                except Exception:
+                    # You can log or handle errors as desired. We just return None here.
+                    return None
+            else:
+                # No such tool in the toolbox
+                return None
+        return None
