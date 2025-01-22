@@ -25,6 +25,12 @@ toolbox.add_tool(
 system = "You are a thinking AI. You have interesting thoughts."
 prompt = "Think about something interesting."
 
+for async text in anthropic_stream(system, prompt):
+    for event in parser.parse_chunk(text):
+        toolbox.use(event)
+
+for event in parser.flush():
+    toolbox.use(event)
 #TODO
 
 print("Thinking called with:", result["thoughts"])

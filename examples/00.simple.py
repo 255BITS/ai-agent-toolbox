@@ -1,6 +1,7 @@
 from ai_agent_toolbox import Toolbox
 from ai_agent_toolbox.tools import Tool
 from ai_agent_toolbox.parsers import XMLParser
+from .util import anthropic_llm_call
 
 # Setup
 toolbox = Toolbox()
@@ -31,5 +32,5 @@ response = anthropic_llm_call(system_prompt=system, prompt=prompt)
 events = parser.parse(response)
 
 for event in events:
-    if event.is_tool_call:
-        toolbox.use(event)
+    #if event.is_tool_call: TODO move to toolbox.use
+    toolbox.use(event)

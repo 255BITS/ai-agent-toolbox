@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock
 
-from ai_agent_toolbox.toolbox import Toolbox
+from ai_agent_toolbox.toolbox import Toolbox, ToolConflictError
 from ai_agent_toolbox.parser_event import ParserEvent, ToolUse
 
 
@@ -118,3 +118,43 @@ def test_use_tool_raising_exception():
 
     result = toolbox.use(event)
     assert result is None
+
+def test_tool_conflict_error():
+    toolbox = Toolbox()
+    toolbox.add_tool(name="test", fn=lambda x: x, args={}, description="")
+    with pytest.raises(ToolConflictError):
+        toolbox.add_tool(name="test", fn=lambda x: x, args={}, description="")
+
+def test_type_conversion():
+    toolbox = Toolbox()
+    toolbox.add_tool(
+        name="converter",
+        fn=lambda **x: x,
+        args={
+            "int_arg": {"type": "integer"},
+            "float_arg": {"type": "number"},
+            "bool_arg": {"type": "boolean"}
+        }
+    )
+    
+    event = ParserEvent(
+        type="tool",
+        mode="close",
+        id="test-id",
+        tool=ToolUse(
+            name="converter",
+            args={
+                "int_arg": "42",
+                "float_arg": "3.14",
+                "bool_arg": "true"
+            }
+        ),
+        is_tool_call=True
+    )
+    
+    result = toolbox.use(event)
+    assert result == {
+        "int_arg": 42,
+        "float_arg": 3.14,
+        "bool_arg": True
+    }

@@ -4,6 +4,11 @@ TODO LOGO
 
 AI Agent Toolbox(AAT) makes AI tool usage across models and frameworks easy. AAT works for parsing single use responses, or in agent and workflow loops.
 
+## About
+
+AI Agent Toolbox is meant to be stable, reliable, and easy to master.
+
+
 ## Features
 
 * Native support protocols such as Anthropic MCP(link)
@@ -43,7 +48,7 @@ toolbox.add_tool(
     fn=thinking,
     args={
         "thoughts": {
-            "type": str,
+            "type": "string",
             "description": "Anything you want to think about"
         }
     },
@@ -77,7 +82,7 @@ toolbox.add_tool(
     fn=thinking,
     args={
         "thoughts": {
-            "type": str,
+            "type": "string",
             "description": "Anything you want to think about"
         }
     },
@@ -131,9 +136,11 @@ Workflows and agent loops involve multiple calls to a LLM provider.
 * Stream when necessary
 * If using native provider tooling, you can also parse your own tools. Using both gets the best of both worlds.
 
-## About
+## Ecosystem
 
-AI Agent Toolbox is meant to be stable, reliable, and easy to master.
+### Usage
+
+Used by [https://github.com/255BITS/ai-agent-examples](https://github.com/255BITS/ai-agent-examples)
 
 ## Credits
 
