@@ -142,6 +142,10 @@ Workflows and agent loops involve multiple calls to a LLM provider.
 
 Used by [https://github.com/255BITS/ai-agent-examples](https://github.com/255BITS/ai-agent-examples)
 
+## License
+
+MIT
+
 ## Credits
 
 AI Agent Toolbox is created and maintained by <a href="255labs.xyz">255labs.xyz</a>

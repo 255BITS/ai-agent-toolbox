@@ -32,37 +32,6 @@ class Toolbox:
             "description": description,
         }
 
-    def usage_prompt(self) -> str:
-        """
-        Generates a prompt explaining tool usage and argument schemas.
-        """
-        lines = ["You can invoke the following tools using <use_tool>:"]
-        
-        for tool_name, data in self._tools.items():
-            lines.extend([
-                f"Tool name: {tool_name}",
-                f"Description: {data['description']}",
-                "Arguments:"
-            ])
-            
-            for arg_name, arg_schema in data["args"].items():
-                arg_type = arg_schema.get("type", "string")
-                arg_desc = arg_schema.get("description", "")
-                lines.append(f"  {arg_name} ({arg_type}): {arg_desc}")
-            
-            lines.append("")
-
-        lines.extend([
-            "Example:",
-            "<use_tool>",
-            "    <name>tool_name</name>",
-            "    <arg1>value1</arg1>",
-            "    <arg2>value2</arg2>",
-            "</use_tool>"
-        ])
-
-        return "\n".join(lines)
-
     def use(self, event: ParserEvent) -> Optional[Any]:
         """
         Executes tools with schema validation and type conversion.
