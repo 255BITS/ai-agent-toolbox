@@ -1,14 +1,13 @@
-<p align="center">
-  <img src="docs/ai-agent-toolbox.jpg" alt="AI Agent Toolbox Logo" width="200">
-</p>
-
 # AI Agent Toolbox
+
+<figure>
+  <img src="docs/ai-agent-toolbox-logo.jpg" alt="AI Agent Toolbox Logo" width="300">
+</figure>
 
 AI Agent Toolbox(AAT) makes AI tool usage across models and frameworks easy. AAT works for parsing single use responses, or in agent and workflow loops.
 
-## About
+AI Agent Toolbox is meant to be stable, reliable, and easy to master. 
 
-AI Agent Toolbox is meant to be stable, reliable, and easy to master.
 
 ## Features
 
