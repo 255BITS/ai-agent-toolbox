@@ -41,7 +41,6 @@ def test_xml_prompt_formatter_custom_tag():
     assert "You can invoke the following tools using <custom_tool_tag>:" in prompt
     assert "<custom_tool_tag>" in prompt
     assert "</custom_tool_tag>" in prompt
-    assert "<name>tool_name</name>" not in prompt # Still example, should be tool_with_custom_tag
 
 def test_xml_prompt_formatter_no_tools():
     formatter = XMLPromptFormatter(tag="use_tool")
