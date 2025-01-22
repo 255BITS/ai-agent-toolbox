@@ -144,3 +144,93 @@ def test_multiple_tools(parser):
     assert len(tool_events) == 2
     assert tool_events[0].tool.args == {"arg1": "value1"}
     assert tool_events[1].tool.args == {"arg2": "value2"}
+
+def test_streaming_split_across_chunks(parser):
+    """Test tool tag split across multiple chunks"""
+    chunks = [
+        "Here's <use_tool><name>thin",
+        "king</name><thoughts>stream",
+        "ing</thoughts></use_tool> works!"
+    ]
+    
+    all_events = []
+    for chunk in chunks:
+        all_events.extend(parser.parse_chunk(chunk))
+    all_events.extend(parser.flush())
+
+    # Verify final structure
+    tool_events = [e for e in all_events if e.is_tool_call]
+    assert len(tool_events) == 1
+    assert tool_events[0].tool.name == "thinking"
+    assert tool_events[0].tool.args == {"thoughts": "streaming"}
+
+    # Verify text before and after
+    text_events = [e for e in all_events if e.type == "text"]
+    assert len(text_events) >= 3  # create/append/close for each text segment
+    assert "Here's " in text_events[1].content
+    assert " works!" in text_events[-2].content
+
+def test_streaming_multiple_small_chunks(parser):
+    """Test with many tiny character chunks"""
+    xml = "<use_tool><name>test</name><arg>value</arg></use_tool>"
+    chunks = list(xml)  # Split into individual characters
+    
+    all_events = []
+    for chunk in chunks:
+        all_events.extend(parser.parse_chunk(chunk))
+    all_events.extend(parser.flush())
+
+    tool_events = [e for e in all_events if e.is_tool_call]
+    assert len(tool_events) == 1
+    assert tool_events[0].tool.name == "test"
+    assert tool_events[0].tool.args == {"arg": "value"}
+
+def test_streaming_partial_start_tag(parser):
+    """Test partial start tag completion across chunks"""
+    chunks = [
+        "Start <use_too",
+        "l><name>test</name></use_tool> end"
+    ]
+    
+    all_events = []
+    for chunk in chunks:
+        all_events.extend(parser.parse_chunk(chunk))
+    all_events.extend(parser.flush())
+
+    tool_events = [e for e in all_events if e.is_tool_call]
+    assert len(tool_events) == 1
+    assert tool_events[0].tool.name == "test"
+
+def test_streaming_back_to_back_tools(parser):
+    """Test consecutive tools across chunks"""
+    chunks = [
+        "<use_tool><name>first</name></use_tool>",
+        "<use_tool><name>second</name></use_tool>"
+    ]
+    
+    all_events = []
+    for chunk in chunks:
+        all_events.extend(parser.parse_chunk(chunk))
+    all_events.extend(parser.flush())
+
+    tool_events = [e for e in all_events if e.is_tool_call]
+    assert len(tool_events) == 2
+    assert tool_events[0].tool.name == "first"
+    assert tool_events[1].tool.name == "second"
+
+def test_streaming_unclosed_tool(parser):
+    """Test flush() completes partial tool parse"""
+    chunks = [
+        "Start <use_tool><name>test</name><arg>val",
+        "ue"
+    ]
+    
+    all_events = []
+    for chunk in chunks:
+        all_events.extend(parser.parse_chunk(chunk))
+    all_events.extend(parser.flush())  # Force completion
+
+    tool_events = [e for e in all_events if e.is_tool_call]
+    assert len(tool_events) == 1
+    assert tool_events[0].tool.name == "test"
+    assert tool_events[0].tool.args == {"arg": "value"}
