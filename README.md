@@ -85,11 +85,7 @@ Workflows and agent loops involve multiple calls to a LLM provider.
 
 ## Ecosystem
 
-### MCP integration
-
-### Usage
-
-Used by [https://github.com/255BITS/ai-agent-examples](https://github.com/255BITS/ai-agent-examples)
+* Used by [https://github.com/255BITS/ai-agent-examples](https://github.com/255BITS/ai-agent-examples)
 
 ## License
 
