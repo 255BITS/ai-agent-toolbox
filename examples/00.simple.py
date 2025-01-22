@@ -1,5 +1,5 @@
 from ai_agent_toolbox import Toolbox, XMLParser, XMLPromptFormatter
-from .util import anthropic_llm_call
+from examples.util import anthropic_llm_call
 
 # Setup
 toolbox = Toolbox()
