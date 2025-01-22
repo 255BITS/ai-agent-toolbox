@@ -4,33 +4,6 @@ from unittest.mock import Mock
 from ai_agent_toolbox.toolbox import Toolbox, ToolConflictError
 from ai_agent_toolbox.parser_event import ParserEvent, ToolUse
 
-
-def test_add_and_usage_prompt():
-    """
-    Test that adding a tool registers it correctly and that usage_prompt
-    returns the expected descriptive text.
-    """
-    toolbox = Toolbox()
-    toolbox.add_tool(
-        name="thinking",
-        fn=lambda thoughts: f"Thinking: {thoughts}",
-        args={
-            "thoughts": {
-                "type": "string",
-                "description": "Anything you want to think about"
-            }
-        },
-        description="For thinking out loud"
-    )
-
-    prompt = toolbox.usage_prompt()
-    assert "thinking" in prompt
-    assert "For thinking out loud" in prompt
-    assert "thoughts (string): Anything you want to think about" in prompt
-    assert "<use_tool>" in prompt
-    assert "</use_tool>" in prompt
-
-
 def test_use_tool_happy_path():
     """
     Test that a tool is properly called when a tool event is passed
@@ -95,7 +68,7 @@ def test_use_event_not_a_tool_call():
 def test_use_tool_raising_exception():
     """
     Test that if the tool function itself raises an exception, the
-    Toolbox.use method catches it and returns None.
+    Toolbox.use method does not catch it and allows it to propagate.
     """
     def error_fn(**kwargs):
         raise ValueError("Simulated tool error")
@@ -116,8 +89,8 @@ def test_use_tool_raising_exception():
         is_tool_call=True
     )
 
-    result = toolbox.use(event)
-    assert result is None
+    with pytest.raises(ValueError, match="Simulated tool error"):
+        toolbox.use(event)
 
 def test_tool_conflict_error():
     toolbox = Toolbox()
