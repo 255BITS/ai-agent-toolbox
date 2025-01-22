@@ -1,4 +1,4 @@
-from anthropic import Anthropic
+from anthropic import Anthropic, AsyncAnthropic
 from openai import OpenAI
 import os
 
@@ -51,3 +51,18 @@ def r1_llm_call(prompt: str, system_prompt: str = "", model: str = "deepseek-rea
     )
 
     return "<think>"+response.choices[0].message.reasoning_content+"</think>"+response.choices[0].message.content
+
+async def anthropic_stream(system_prompt: str, prompt: str, model="claude-3-5-sonnet-20241022"):
+    """Async generator that yields chunks from Anthropic's streaming API"""
+    client = AsyncAnthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+    
+    async with client.messages.stream(
+        model=model,
+        max_tokens=4096,
+        system=system_prompt,
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.7,
+    ) as stream:
+        async for event in stream:
+            if event.type == "content_block_delta" and event.delta.type == "text_delta":
+                yield event.delta.text
