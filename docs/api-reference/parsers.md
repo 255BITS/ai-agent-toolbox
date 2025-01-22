@@ -4,6 +4,8 @@ AI Agent Toolbox parsers are fast and support streaming.
 
 ## XMLParser
 
+Note that this is not a strict XML parser. The parser is very open with what it expects. For example, React snippets work without the need for CDATA.
+
 ```python
 class XMLParser:
     """
@@ -42,7 +44,6 @@ class XMLParser:
 
 ## FlatXMLParser
 
-
 ```python
 class FlatXMLParser:
     """
@@ -73,4 +74,20 @@ events = parser.parse("<search>AI news</action>")
     ParserEvent(type='tool', name='action', mode='append', id='1', content='AI news'),
     ParserEvent(type='tool', name='action', mode='close', id='1', is_tool_call=True, content='AI news')
 ]
+```
+
+## ParserEvent
+
+```python
+class ParserEvent:
+    """
+    Represents parsing events during stream processing.
+    """
+
+    type: str  # Specifies the type of event, either 'text' or 'tool'.
+    mode: str  # The mode of the event, which can be 'create', 'append', or 'close'.
+    id: str  # A unique identifier for the event.
+    tool: Optional[ToolUse]  # Details of the tool invocation, if applicable.
+    is_tool_call: bool  # Indicates whether this is the final closure of a tool.
+    content: Optional[str]  # The content of the text or tool.
 ```
