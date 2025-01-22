@@ -1,6 +1,8 @@
-# AI Agent Toolbox
+<p align="center">
+  <img src="docs/ai-agent-toolbox.jpg" alt="AI Agent Toolbox Logo" width="200">
+</p>
 
-TODO LOGO
+# AI Agent Toolbox
 
 AI Agent Toolbox(AAT) makes AI tool usage across models and frameworks easy. AAT works for parsing single use responses, or in agent and workflow loops.
 
@@ -10,18 +12,22 @@ AI Agent Toolbox is meant to be stable, reliable, and easy to master.
 
 ## Features
 
-* Native support protocols such as Anthropic MCP(TODO link)
+* Model provider-agnostic - supports Anthropic, OpenAI, Groq, NEAR AI, Ollama, Hyperbolic, NanoGPT, and more
+* Framework compatible - usable in anthropic-sdk-python, openai-python, ell, LangChain, etc
+* Supports protocols such as Anthropic Model Context Protocol(MCP)
 * Robust parsing
 * Streaming support
-* Support for read-write and write-only tools
-* Framework compatible
-* Model provider-agnostic - supports Anthropic, OpenAI, Groq, Ollama, Hyperbolic, NanoGPT, and more
+* Support for read-write and write-only tools (feedback)
 
 ## Installation
 
 ```
 pip install ai-agent-toolbox(TODO)
 ```
+
+## Examples
+
+See our [examples](examples) folder for more!
 
 ## Usage
 
@@ -46,7 +52,6 @@ Anthropic can support native tool use, or you can parse the response that comes 
 ```python
 TODO example
 ```
-
 
 #### OpenAI tooling
 
@@ -75,8 +80,9 @@ Workflows and agent loops involve multiple calls to a LLM provider.
 ## Tips
 
 * Keep the system prompt the same across invocations when using multiple LLM calls
-* Stream when necessary
-* If using native provider tooling, you can also parse your own tools. Using both gets the best of both worlds.
+* Stream when necessary, for example when a user is waiting for output
+* Native provider tooling can be used with local parsing
+* Start simple and expand. You can test with static strings to ensure your tools are working correctly.
 
 ## Ecosystem
 
