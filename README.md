@@ -8,10 +8,9 @@ AI Agent Toolbox(AAT) makes AI tool usage across models and frameworks easy. AAT
 
 AI Agent Toolbox is meant to be stable, reliable, and easy to master.
 
-
 ## Features
 
-* Native support protocols such as Anthropic MCP(link)
+* Native support protocols such as Anthropic MCP(TODO link)
 * Robust parsing
 * Streaming support
 * Support for read-write and write-only tools
@@ -26,74 +25,16 @@ pip install ai-agent-toolbox(TODO)
 
 ## Usage
 
-Add a thinking Tool.
-
 ### Asynchronous
 
 ```python
-from ai_agent_toolbox import Toolbox
-from ai_agent_toolbox.tools import Tool
-from ai_agent_toolbox.parsers import XMLParser
-
-# Your workbench setup
-toolbox = Toolbox()
-parser = XMLParser(tag="use_tool")
-
-async def thinking(thoughts=""):
-    print("I am thinking: "+thoughts)
-
-# Adding tools to your toolbox
-toolbox.add_tool(
-    name="thinking",
-    fn=thinking,
-    args={
-        "thoughts": {
-            "type": "string",
-            "description": "Anything you want to think about"
-        }
-    },
-    description="For thinking out loud"
-)
-
-#TODO anthropic code and setting prompt
-async for event in parser.stream(ai_response):
-    if event.is_tool_call:
-        tool_result = await toolbox.use(event.name, event.args)
-print("thinking called with", tool_result["thoughts"])
+TODO example
 ```
 
 ### Synchronous
 
 ```python
-from ai_agent_toolbox import Toolbox
-from ai_agent_toolbox.tools import Tool
-from ai_agent_toolbox.parsers import XMLParser
-
-# Your workbench setup
-toolbox = Toolbox()
-parser = XMLParser(tag="use_tool")
-
-def thinking(thoughts=""):
-    print("I am thinking: "+thoughts)
-
-# Adding tools to your toolbox
-toolbox.add_tool(
-    name="thinking",
-    fn=thinking,
-    args={
-        "thoughts": {
-            "type": "string",
-            "description": "Anything you want to think about"
-        }
-    },
-    description="For thinking out loud"
-)
-
-#TODO anthropic code and setting prompt
-for event in parser.parse(ai_response):
-    if event.is_tool_call:
-        tool_result = toolbox.use(event.name, event.args)
-print("thinking called with", tool_result["thoughts"])
+TODO example
 ```
 
 ### Native Providers
@@ -103,6 +44,7 @@ print("thinking called with", tool_result["thoughts"])
 Anthropic can support native tool use, or you can parse the response that comes back.
 
 ```python
+TODO example
 ```
 
 
@@ -111,7 +53,7 @@ Anthropic can support native tool use, or you can parse the response that comes 
 OpenAI uses swagger definitions. You can support native OpenAI tooling as follows:
 
 ```python
-#TODO
+TODO example
 ```
 
 #### Local tooling
@@ -137,6 +79,8 @@ Workflows and agent loops involve multiple calls to a LLM provider.
 * If using native provider tooling, you can also parse your own tools. Using both gets the best of both worlds.
 
 ## Ecosystem
+
+### MCP integration
 
 ### Usage
 
