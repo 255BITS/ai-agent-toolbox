@@ -224,11 +224,11 @@ def test_streaming_partial_tag(parser):
 
     all_events = events1 + events2 + events_flush
     # Expect text create, append, close for "Hello "
-    # Then tool create, append, close for <think>
+    # Then tool create, append, append, close for <think>
     # Then text create, append, close for " bye"
     # => total 9 events
 
-    assert len(all_events) == 9
+    assert len(all_events) == 10
 
     # Validate the first text block
     assert_text_create(all_events[0])
