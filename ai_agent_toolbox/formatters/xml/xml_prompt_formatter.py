@@ -26,14 +26,20 @@ class XMLPromptFormatter(PromptFormatter):
 
             lines.append("")
 
-        lines.extend([
-            "Example:",
-            f"<{self.tag}>",
-            "    <name>tool_name</name>",
-            "    <arg1>value1</arg1>",
-            "    <arg2>value2</arg2>",
-            f"</{self.tag}>"
-        ])
+        lines.append("Examples:")
+        for tool_name, data in tools.items():
+            example_lines = [
+                f"<{self.tag}>",
+                f"    <name>{tool_name}</name>"
+            ]
+            
+            for i, arg_name in enumerate(data["args"].keys(), start=1):
+                example_lines.append(f"    <{arg_name}>value{i}</{arg_name}>")
+            
+            example_lines.append(f"</{self.tag}>")
+            lines.extend(example_lines)
+            # Add empty line between examples
+            lines.append("")
 
         return "\n".join(lines)
 
