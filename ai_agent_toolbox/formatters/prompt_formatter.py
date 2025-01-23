@@ -1,3 +1,5 @@
+from typing import Dict
+
 class PromptFormatter:
     """Abstract base class for prompt formatters."""
     def format_prompt(self, tools: Dict[str, Dict[str, str]]) -> str:
