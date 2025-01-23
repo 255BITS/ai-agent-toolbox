@@ -1,6 +1,7 @@
 from ai_agent_toolbox import Toolbox, FlatXMLParser, FlatXMLPromptFormatter
 from examples.util import anthropic_llm_call
 
+# This example shows a write-only Tool(no feedback) writing to an environment. The state of the Environment is shared with the LLM.
 class ShoppingEnvironment:
     """Simple environment to track shopping list items"""
     def __init__(self):
