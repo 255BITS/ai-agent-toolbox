@@ -208,6 +208,20 @@ def test_unknown_tag(parser):
     assert_tool_append(e5, tool_id, "Captured")
     assert_tool_close(e6, tool_id, "think", "Captured")
 
+def test_nested_unknown_tags(parser):
+    """Test that nested unknown tags are treated as plain text without parsing."""
+    text = "<diff>outer<diff>inner</diff></diff>"
+    events = list(parser.parse(text))
+    # Should create a single text block containing the entire XML as text
+    assert len(events) == 3
+
+    e1, e2, e3 = events
+    assert_text_create(e1)
+    text_id = e1.id
+    # The entire content including both <diff> tags is captured as text
+    assert_text_append(e2, text_id, "<diff>outer<diff>inner</diff></diff>")
+    assert_text_close(e3, text_id)
+
 
 #
 # Streaming Tests
