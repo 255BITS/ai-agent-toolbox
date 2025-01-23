@@ -2,13 +2,14 @@ import uuid
 from typing import List, Optional
 
 from .tool_parser import ToolParser, ToolParserState
+from ai_agent_toolbox.parser import Parser
 from ai_agent_toolbox.parser_event import ParserEvent, ToolUse
 
 class ParserState:
     OUTSIDE = "outside"
     INSIDE_TOOL = "inside_tool"
 
-class XMLParser:
+class XMLParser(Parser):
     """
     Accumulates text until <use_tool>, then delegates to ToolParser.
     Once we detect <use_tool>, we shift into INSIDE_TOOL state and feed 

@@ -1,8 +1,9 @@
-from ai_agent_toolbox import FlatXMLParser
+from ai_agent_toolbox import FlatXMLParser, FlatXMLPromptFormatter
 from examples.util import r1_llm_call
 from pprint import pprint
 
 parser = FlatXMLParser("think")
+formatter = FlatXMLPromptFormatter(tag="use_tool")
 
 system = "You are a thinking AI. You have interesting thoughts."
 prompt = "Think about something interesting."

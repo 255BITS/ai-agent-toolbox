@@ -1,7 +1,8 @@
 import uuid
 from ai_agent_toolbox.parser_event import ParserEvent, ToolUse
+from ai_agent_toolbox.parser import Parser
 
-class FlatXMLParser:
+class FlatXMLParser(Parser):
     """
     A simple, flat parser that scans for one or more specific XML-style tags
     (e.g. <think>...</think>, <action>...</action>) within a string,
