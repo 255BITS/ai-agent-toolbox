@@ -24,7 +24,7 @@ def test_xml_prompt_formatter_basic():
     assert "Arguments:" in prompt
     assert "thoughts (string): Anything you want to think about" in prompt
     assert "<use_tool>" in prompt
-    assert "<name>tool_name</name>" in prompt
+    assert "<name>thinking</name>" in prompt
     assert "</use_tool>" in prompt
 
 def test_xml_prompt_formatter_custom_tag():
