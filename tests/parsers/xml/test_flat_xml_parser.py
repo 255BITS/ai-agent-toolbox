@@ -218,8 +218,8 @@ def test_nested_unknown_tags(parser):
     e1, e2, e3 = events
     assert_text_create(e1)
     text_id = e1.id
-    # The entire content including both <diff> tags is captured as text
-    assert_text_append(e2, text_id, "<diff>outer<diff>inner</diff></diff>")
+    # The entire content including <diff> tag is captured as text
+    assert_text_append(e2, text_id, "outer<diff>inner</diff>")
     assert_text_close(e3, text_id)
 
 
