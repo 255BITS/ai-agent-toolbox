@@ -1,6 +1,6 @@
 import uuid
 from ai_agent_toolbox.parser_event import ParserEvent, ToolUse
-from ai_agent_toolbox.parser import Parser
+from ai_agent_toolbox.parsers import Parser
 
 class FlatXMLParser(Parser):
     """

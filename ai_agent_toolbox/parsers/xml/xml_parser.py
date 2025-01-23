@@ -2,7 +2,7 @@ import uuid
 from typing import List, Optional
 
 from .tool_parser import ToolParser, ToolParserState
-from ai_agent_toolbox.parser import Parser
+from ai_agent_toolbox.parsers import Parser
 from ai_agent_toolbox.parser_event import ParserEvent, ToolUse
 
 class ParserState:
