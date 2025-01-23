@@ -63,9 +63,9 @@ TODO example
 
 This supports other providers and open source models. Here you parse the results yourself.
 
-### Retrieval and read-write Tools
+### Retrieval and read-write tools
 
-Some tools, such as search, may want to give the AI information for further action. This involves crafting a new prompt to the LLM includes any Tool responses. We make this easy.
+Some tools, such as search, may want to give the AI information for further action. This involves crafting a new prompt to the LLM includes any tool responses. We make this easy.
 
 ```python
 # TODO Example
@@ -86,7 +86,7 @@ Workflows and agent loops involve multiple calls to a LLM provider.
 
 ### Used by
 * [https://github.com/255BITS/ai-agent-examples](https://github.com/255BITS/ai-agent-examples) - A repository of examples of agentic workflows
-* [https://github.com/255BITS/gptdiff](https://github.com/255BITS/gptdiff) - Automatically create diffs and apply them using AI.
+* [https://github.com/255BITS/gptdiff](https://github.com/255BITS/gptdiff) - AI automatically create diffs and applies them
 
 ## License
 
