@@ -84,7 +84,9 @@ Workflows and agent loops involve multiple calls to a LLM provider.
 
 ## Ecosystem
 
-* Used by [https://github.com/255BITS/ai-agent-examples](https://github.com/255BITS/ai-agent-examples)
+### Used by
+* [https://github.com/255BITS/ai-agent-examples](https://github.com/255BITS/ai-agent-examples) - A repository of examples of agentic workflows
+* [https://github.com/255BITS/gptdiff](https://github.com/255BITS/gptdiff) - Automatically create diffs and apply them using AI.
 
 ## License
 
