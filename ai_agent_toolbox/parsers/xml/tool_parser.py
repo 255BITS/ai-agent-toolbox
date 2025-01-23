@@ -13,11 +13,11 @@ class ToolParser:
       - Extracts the <name>...</name> for a tool
       - Then captures zero or more <argName>...</argName> pairs
       - Concludes when it finds </use_tool>.
-    
+
     This implementation does NOT use regex. It processes data chunk by chunk,
-    storing partial content in self.buffer until enough data arrives to 
+    storing partial content in self.buffer until enough data arrives to
     continue parsing.
-    
+
     The parse(...) method returns:
       - a list of ParserEvents
       - a boolean indicating if the tool parsing is done (i.e., we've parsed </use_tool>)
@@ -82,23 +82,17 @@ class ToolParser:
         start_tag = "<name>"
         end_tag = "</name>"
 
-        # 1. Find <name>
         start_idx = self.buffer.find(start_tag)
         if start_idx == -1:
-            # Possibly partial or no <name> present yet
-            # See if there's a partial prefix that might match <name> eventually
-            partial = self._partial_prefix(self.buffer, start_tag)
-            # We do not discard anything yet; wait for more data
+            # Possibly partial or no <name> yet; do nothing.
             return
 
-        # 2. Find </name> after that
         close_idx = self.buffer.find(end_tag, start_idx + len(start_tag))
         if close_idx == -1:
             # Not complete yet. Possibly partial.
-            partial = self._partial_prefix(self.buffer[start_idx:], end_tag)
             return
 
-        # If we got here, we have a complete <name>...</name>.
+        # We have a complete <name>...</name>.
         name_text_start = start_idx + len(start_tag)
         name_text = self.buffer[name_text_start:close_idx].strip()
 
@@ -117,35 +111,35 @@ class ToolParser:
           - the end of the tool: </{self.tag}>
         We'll parse as much as possible. If we cannot find a complete tag, we wait for more data.
         """
-        # See if we can find the tool's end tag
         close_pos = self.buffer.find(self.end_tag)
         if close_pos == -1:
-            # No complete end tag found yet. We'll parse what we can of arguments.
-            # Attempt to parse arguments from the entire buffer or partial.
-            self._parse_tool_arguments(self.buffer)
-            # after parse_tool_arguments, we keep the entire buffer if partial
-            # so just return now (we only remove fully parsed text inside that method).
-            return
+            # No tool end tag found; parse arguments from entire buffer
+            consumed = self._parse_tool_arguments(self.buffer)
+            # Remove consumed portion from buffer
+            self.buffer = self.buffer[consumed:]
         else:
-            # We found the end tag. Everything before that belongs to argument content.
+            # We found the tool end tag, so parse arguments up to that point
             inside_text = self.buffer[:close_pos]
-            self._parse_tool_arguments(inside_text)
-            # Now remove the end tag from the buffer
-            end_of_tag = close_pos + len(self.end_tag)
-            self.buffer = self.buffer[end_of_tag:]
-            # Finalize
-            self._finalize_tool()
-            self.state = ToolParserState.DONE
+            consumed = self._parse_tool_arguments(inside_text)
+            if consumed == len(inside_text):
+                # We fully consumed the inside text => remove end tag as well
+                self.buffer = self.buffer[close_pos + len(self.end_tag):]
+                self._finalize_tool()
+                self.state = ToolParserState.DONE
+            else:
+                # Partial parse; only consumed `consumed` chars from inside_text
+                leftover = inside_text[consumed:]
+                # Put back the leftover + the end tag portion
+                self.buffer = leftover + self.buffer[close_pos:]
 
-    def _parse_tool_arguments(self, text: str):
+    def _parse_tool_arguments(self, text: str) -> int:
         """
-        Parse argument data in `text`. We'll look for <argName>...</argName> pairs,
-        or treat untagged content as literal argument text if inside an arg.
-        We stop when we can't parse further (partial).
-        
-        This function does NOT remove from self.buffer itself; it processes `text`
-        and decides how many characters were fully parsed. For partially parsed 
-        tags, it leaves them in the parser's buffer for the next round.
+        Parse argument data in `text` and return how many characters we fully consumed.
+        We'll look for <argName>...</argName> pairs, or treat untagged content
+        as literal argument text if inside an arg.
+
+        If we hit a partial tag, we stop parsing and return the index
+        of the last fully consumed character.
         """
         i = 0
         length = len(text)
@@ -153,7 +147,7 @@ class ToolParser:
         while i < length:
             lt_index = text.find("<", i)
             if lt_index == -1:
-                # No more '<' => remainder is argument text
+                # No more '<', so the remainder is argument text
                 remainder = text[i:]
                 self._append_tool_arg(remainder)
                 i = length
@@ -169,13 +163,13 @@ class ToolParser:
             gt_index = text.find(">", lt_index + 1)
             if gt_index == -1:
                 # We have a partial tag "<something" with no closing '>' yet.
-                # We'll wait for more data. Nothing is consumed from self.buffer.
+                # We'll wait for more data. Nothing beyond i is fully consumed.
                 break
 
             # We have a complete tag from lt_index..gt_index
-            full_tag = text[lt_index + 1:gt_index].strip()  # what's inside < ... >
+            full_tag = text[lt_index + 1:gt_index].strip()  # what's inside <...>
             i = gt_index + 1  # advance past '>'
-            
+
             if full_tag.startswith("/"):
                 # It's a closing tag, e.g. </thoughts>
                 tag_name = full_tag[1:].strip()
@@ -183,12 +177,10 @@ class ToolParser:
                 if self.current_arg_name == tag_name:
                     self._close_tool_arg()
                 else:
-                    # Possibly a mismatched or unknown closing tag
-                    # For safety, you could treat it as literal text or ignore,
-                    # but we'll just close any open arg to avoid confusion:
+                    # Possibly mismatched or unknown closing tag;
+                    # we close any open arg to avoid confusion.
                     if self.current_arg_name:
                         self._close_tool_arg()
-                continue
             else:
                 # It's an opening tag, e.g. <thoughts>
                 # If there's an arg already open, we close it before opening a new one
@@ -197,20 +189,8 @@ class ToolParser:
                 arg_name = full_tag
                 self._start_tool_arg(arg_name)
 
-    def _partial_prefix(self, text: str, pattern: str) -> str:
-        """
-        Check if the end of 'text' is a prefix of 'pattern'. 
-        This helps us detect partial tags so we don't consume them prematurely.
-        """
-        max_len = min(len(text), len(pattern) - 1)
-        for size in range(max_len, 0, -1):
-            if pattern.startswith(text[-size:]):
-                return text[-size:]
-        return ""
+        return i
 
-    # --------------------------------------------------------------------------
-    # Tool methods
-    # --------------------------------------------------------------------------
     def _create_tool(self, name: str):
         if not name:
             raise ValueError("Tool name is required")
