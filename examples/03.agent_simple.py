@@ -50,20 +50,18 @@ print("System prompt:", system_prompt)
 while len(env.items) < MAX_ITEMS:
     # Create state-aware prompt
     user_prompt = f"Current list ({len(env.items)}/{MAX_ITEMS}): {', '.join(env.items) if env.items else 'empty'}. What item should we add next?"
-    
+
     # Get agent response
     response = anthropic_llm_call(
         system_prompt=system_prompt,
         prompt=user_prompt,
     )
-    
+
     # Process and execute tool calls
     events = parser.parse(response)
     for event in events:
         if event.is_tool_call and event.tool.name == "add_item":
             toolbox.use(event)
-    
-print(env)
-print("---\n")
 
+print(env)
 print("✅ Shopping list complete!")
