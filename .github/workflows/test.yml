@@ -10,7 +10,7 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04  # Use an LTS version that supports Python 3.7
 
     steps:
       # Step 1: Checkout the code
@@ -21,13 +21,13 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.7'  # Specify the Python version you want to use
+          python-version: '3.7'  # Specify the Python version
 
       # Step 3: Install dependencies
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt  # Adjust if using other dependency tools
+          pip install -r requirements.txt
 
       # Step 4: Run pytest
       - name: Run tests
