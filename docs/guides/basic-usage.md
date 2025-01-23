@@ -9,7 +9,7 @@ Tools are the core concept in AI Agent Toolbox. A tool is a function that can be
 ```python
 def search_database(query: str, limit: int = 10):
     # Implementation
-    pass
+    return results
 
 toolbox.add_tool(
     name="search",
@@ -27,3 +27,4 @@ toolbox.add_tool(
     },
     description="Search the database for relevant information"
 )
+```

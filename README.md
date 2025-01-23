@@ -4,10 +4,9 @@
   <img src="docs/ai-agent-toolbox-logo.jpg" alt="AI Agent Toolbox Logo" width="300">
 </figure>
 
-AI Agent Toolbox(AAT) makes AI tool usage across models and frameworks easy. AAT works for parsing single use responses, or in agent and workflow loops.
+AI Agent Toolboxmakes AI tool usage across models and frameworks easy. For use with parsing single responses or in agent loops and workflow.
 
-AI Agent Toolbox is meant to be stable, reliable, and easy to master. 
-
+AI Agent Toolbox is meant to be stable, reliable, and easy to master.
 
 ## Features
 
@@ -16,7 +15,7 @@ AI Agent Toolbox is meant to be stable, reliable, and easy to master.
 * Supports protocols such as Anthropic Model Context Protocol(MCP)
 * Robust parsing
 * Streaming support
-* Support for read-write and write-only tools (feedback)
+* Support for read-write tools (feedback) as well as write-only tools
 
 ## Installation
 
