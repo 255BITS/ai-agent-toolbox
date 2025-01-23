@@ -8,17 +8,16 @@ parser = FlatXMLParser("think")
 formatter = FlatXMLPromptFormatter(tag="think")
 
 # Add tools to your toolbox
-# Note: argument name is always 'default' with FlatXMLParser
-# TODO This is a bit of a smell, should do *args instead of **kwargs
-def think(default=""):
-    print("I'm thinking:", default)
+# Single required argument passed positionally
+def think(content=""):
+    print("I'm thinking:", content)
 
 toolbox.add_tool(
     name="think",
     fn=think,
     args={
         # FlatXMLParser only takes a single string as an argument
-        "default": {
+        "content": {
             "type": "string",
             "description": "Anything you want to think about"
         }
