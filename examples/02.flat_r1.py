@@ -29,9 +29,6 @@ toolbox.add_tool(
 system = "You are a thinking AI. You have interesting thoughts.\n"
 prompt = "Think about something interesting."
 
-# Add our usage prompt
-system += formatter.usage_prompt(toolbox)
-
 response = r1_llm_call(system_prompt=system, prompt=prompt)
 events = parser.parse(response)
 

@@ -13,6 +13,8 @@ class Toolbox:
             
         use(event: ParserEvent) -> Optional[Any]
             Execute tool from parsed event
+        use_async(event: ParserEvent) -> Optional[Any]
+            Execute tool from parsed event, for async tools
     """
 ```
 

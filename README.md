@@ -4,7 +4,7 @@
   <img src="docs/ai-agent-toolbox-logo.jpg" alt="AI Agent Toolbox Logo" width="300">
 </figure>
 
-AI Agent Toolboxmakes AI tool usage across models and frameworks easy. For use with parsing single responses or in agent loops and workflow.
+AI Agent Toolbox makes AI tool usage across models and frameworks easy. For use with parsing single responses or in agent loops and workflow.
 
 AI Agent Toolbox is meant to be stable, reliable, and easy to master.
 
