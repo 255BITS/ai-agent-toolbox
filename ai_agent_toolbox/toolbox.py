@@ -1,42 +1,52 @@
 from typing import Any, Callable, Dict, Optional
 from .parser_event import ParserEvent, ToolUse
+import inspect
 
 class ToolConflictError(Exception):
     """Raised when trying to register a tool name that already exists"""
     pass
 
 class Toolbox:
-    """
-    A toolbox that holds callable tools with schema validation,
-    type conversion, and usage prompt generation.
-    """
-
     def __init__(self):
         self._tools: Dict[str, Dict[str, Any]] = {}
 
-    def add_tool(
-        self,
-        name: str,
-        fn: Callable[..., Any],
-        args: Dict[str, Dict[str, str]],
-        description: str = "",
-    ) -> None:
-        """
-        Register a tool with validation against name conflicts.
-        """
+    def add_tool(self, name: str, fn: Callable, args: Dict, description: str = ""):
         if name in self._tools:
             raise ToolConflictError(f"Tool {name} already registered")
+
+        # Store whether the function is async
         self._tools[name] = {
             "fn": fn,
+            "is_async": inspect.iscoroutinefunction(fn),
             "args": args,
             "description": description,
         }
 
+    # Synchronous execution
     def use(self, event: ParserEvent) -> Optional[Any]:
-        """
-        Executes tools with schema validation and type conversion.
-        Returns None for invalid calls or execution errors.
-        """
+        """For sync tool execution only"""
+        tool_data = self._get_tool_data(event)
+        if not tool_data:
+            return None
+
+        if tool_data["is_async"]:
+            raise RuntimeError(f"Async tool {event.tool.name} called with sync use(). Call use_async() instead.")
+
+        return tool_data["fn"](**tool_data["processed_args"])
+
+    # Asynchronous execution
+    async def use_async(self, event: ParserEvent) -> Optional[Any]:
+        """For both sync and async tools"""
+        tool_data = self._get_tool_data(event)
+        if not tool_data:
+            return None
+
+        if tool_data["is_async"]:
+            return await tool_data["fn"](**tool_data["processed_args"])
+        return tool_data["fn"](**tool_data["processed_args"])
+
+    def _get_tool_data(self, event: ParserEvent) -> Optional[Dict]:
+        """Shared validation and argument processing"""
         if not event.is_tool_call or not event.tool:
             return None
 
@@ -44,20 +54,19 @@ class Toolbox:
         if tool_name not in self._tools:
             return None
 
-        tool_data = self._tools[tool_name]
+        tool_data = self._tools[tool_name].copy()
         processed_args = {}
-
+        
         for arg_name, arg_schema in tool_data["args"].items():
-            # Validate required arguments
-            print("items", arg_name)
             if arg_name not in event.tool.args:
                 return None
-
-            # Convert argument types
+                
             raw_value = event.tool.args[arg_name]
             arg_type = arg_schema.get("type", "string")
             processed_args[arg_name] = self._convert_arg(raw_value, arg_type)
-        return tool_data["fn"](**processed_args)
+        
+        tool_data["processed_args"] = processed_args
+        return tool_data
 
     @staticmethod
     def _convert_arg(value: str, arg_type: str) -> Any:

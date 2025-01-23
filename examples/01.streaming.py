@@ -7,7 +7,7 @@ toolbox = Toolbox()
 parser = XMLParser(tag="use_tool")
 formatter = XMLPromptFormatter(tag="use_tool")
 
-def thinking(thoughts=""):
+async def thinking(thoughts=""):
     print(f"Thinking: {thoughts}")
 
 # Adding tools to your toolbox
@@ -27,11 +27,11 @@ async def main():
     system = "You are a thinking AI. You have interesting thoughts."
     prompt = "Think about something interesting."
     system += formatter.usage_prompt(toolbox)
-    
+
     async for chunk in anthropic_stream(system, prompt):
         for event in parser.parse_chunk(chunk):
-            toolbox.use(event)
-    
+            await toolbox.use_async(event)
+
     # Process any remaining events after stream ends
     for event in parser.flush():
         toolbox.use(event)
