@@ -6,10 +6,10 @@ toolbox = Toolbox()
 parser = XMLParser(tag="use_tool")
 formatter = XMLPromptFormatter(tag="use_tool")
 
+# Add tools to your toolbox
 def thinking(thoughts=""):
     print("I'm thinking:", thoughts)
 
-# Add tools to your toolbox
 toolbox.add_tool(
     name="thinking",
     fn=thinking,

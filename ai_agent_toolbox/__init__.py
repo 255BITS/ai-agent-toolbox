@@ -5,5 +5,5 @@ from .formatters.xml.xml_prompt_formatter import XMLPromptFormatter
 from .parser_event import ParserEvent
 
 __all__ = [
-    "Toolbox", "Tool", "XMLParser", "FlatXMLParser", "ParserEvent", "XMLPromptFormatter"
+    "Toolbox", "XMLParser", "FlatXMLParser", "ParserEvent", "XMLPromptFormatter"
 ]
