@@ -264,8 +264,7 @@ class FlatXMLParser(Parser):
                 mode="close",
                 id=self._tool_id,
                 is_tool_call=True,
-                tool=ToolUse(name=self._current_tag_name, args={}),
-                content="".join(self._tool_content_buffer)
+                tool=ToolUse(name=self._current_tag_name, args={"default": "".join(self._tool_content_buffer)}),
             )
         )
 

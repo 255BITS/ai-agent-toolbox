@@ -22,7 +22,7 @@ toolbox.add_tool(
     description="For thinking out loud"
 )
 
-system = "You are a thinking AI. You have interesting thoughts."
+system = "You are a thinking AI. You have interesting thoughts.\n"
 prompt = "Think about something interesting."
 
 # Add our usage prompt

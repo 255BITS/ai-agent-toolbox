@@ -59,7 +59,8 @@ class Toolbox:
         
         for arg_name, arg_schema in tool_data["args"].items():
             if arg_name not in event.tool.args:
-                return None
+                print("Could not find argument", arg_name)
+                continue
                 
             raw_value = event.tool.args[arg_name]
             arg_type = arg_schema.get("type", "string")
