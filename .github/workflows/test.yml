@@ -21,13 +21,13 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.7'  # Specify the Python version
+          python-version: '3.7'
 
-      # Step 3: Install dependencies
-      - name: Install dependencies
+      # Step 3: Install pytest and any other testing tools
+      - name: Install pytest
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install pytest  # Install pytest explicitly
 
       # Step 4: Run pytest
       - name: Run tests
