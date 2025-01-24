@@ -48,7 +48,7 @@ class Toolbox:
         else:
             tool_result = tool_data["fn"](**tool_data["processed_args"])
         return ToolResponse(
-            tool_name=event.tool.name,
+            tool=event.tool,
             result=tool_result
         )
 
