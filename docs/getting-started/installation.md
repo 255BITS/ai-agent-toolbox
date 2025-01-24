@@ -8,7 +8,7 @@ pip install ai-agent-toolbox
 
 ## Requirements
 
-- Python 3.8+
+- Python 3.7+
 - Optional dependencies for specific providers:
   - `anthropic` for Anthropic integration
   - `openai` for OpenAI integration

@@ -52,15 +52,3 @@ class XMLPromptFormatter(PromptFormatter):
         if self.feedback_buffer:
             return f"{base_prompt}\n\n{self._format_feedback()}"
         return base_prompt
-
-    def with_feedback(self, buffer):
-        self.feedback_buffer = buffer
-        return self
-
-    def _format_feedback(self):
-        if not self.feedback_buffer:
-            return ""
-        return "Recent Results:\n" + "\n".join(
-            f"<result>{item}</result>" 
-            for item in self.feedback_buffer.last(3)
-        )

@@ -7,8 +7,14 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     install_requires=[],
+    extras_require={
+        'dev': ['pytest']
+    },
+    python_requires=">=3.7",
     license="MIT",
     description="An easy to use framework for adding tool use to AI agents.",
+    long_description=open('README.md').read(),
+    long_description_content_type='text/markdown',
     author="255labs.xyz",
     author_email="martyn@255bits.com",
     url="https://github.com/255BITS/ai-agent-toolbox",
@@ -17,5 +23,4 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires=">=3.7",
 )
