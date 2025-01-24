@@ -59,7 +59,7 @@ formatter = XMLPromptFormatter(tag="tool")
 feedback_history = []
 
 # Initial query from the user
-query = "AI safety research"
+query = "AI agent researcher"
 
 # Run multiple query cycles
 for cycle in range(3):
@@ -68,7 +68,8 @@ for cycle in range(3):
     # Use the last feedback if it exists, otherwise start with nothing
     last_feedback = feedback_history[-1] if feedback_history else ""
     user_prompt = f"{last_feedback}\nPlease research: {query}"
-    print("User prompt:".ljust(15), user_prompt, "\n")
+    print("User prompt:\n", user_prompt, "\n")
+    print()
 
     # Call your LLM (Anthropic, in this example)
     response = anthropic_llm_call(
@@ -79,7 +80,8 @@ for cycle in range(3):
         ),
         prompt=user_prompt
     )
-    print("LLM response:".ljust(15), response, "\n")
+    print("LLM response:\n", response, "\n")
+    print()
 
     # Parse out any <tool> usage and execute
     events = parser.parse(response)
