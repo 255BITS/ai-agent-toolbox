@@ -31,10 +31,10 @@ Please research: {query}"""
     findings = []
     events = parser.parse(response)
     for event in events:
-        if event.is_tool_call:
-            result = toolbox.use(event)
-            if result:
-                findings.append(result)
+        if event.is_tool_call and event.tool:
+            tool_response = toolbox.use(event)
+            if tool_response and tool_response.result:
+                findings.append(tool_response.result)
     
     # Store results in feedback buffer
     if findings:

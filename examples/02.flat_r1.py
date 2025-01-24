@@ -32,4 +32,4 @@ response = r1_llm_call(system_prompt=system, prompt=prompt)
 events = parser.parse(response)
 
 for event in events:
-    result = toolbox.use(event)
+    toolbox.use(event)

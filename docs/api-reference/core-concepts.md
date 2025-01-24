@@ -31,3 +31,4 @@ LLM Response → Parser → ParserEvents → Toolbox → Tool Execution
 
 ### Read-write(Feedback)
 LLM Response → Parser → ParserEvents → Toolbox → Tool Execution → Insert Tool Response → Call LLM
+Tool responses are wrapped in ToolResponse objects containing results, errors, and contextual metadata

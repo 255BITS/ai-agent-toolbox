@@ -21,6 +21,7 @@ class Toolbox:
 ### Example Registration
 
 ```python
+```python
 def image_generate(prompt: str, style: str = "realistic"):
     """Generate image from text prompt"""
     pass
@@ -34,4 +35,20 @@ toolbox.add_tool(
     },
     description="Text-to-image generation tool"
 )
+```
+
+### Handling Responses
+
+```python
+events = parser.parse(llm_response)
+for event in events:
+    if event.is_tool_call:
+        response = toolbox.use(event)
+        if response:
+            print(f"""
+Tool used: {response.tool.name}
+Arguments: {response.tool.args}
+Result: {response.result}
+Error: {response.error}
+""")
 ```

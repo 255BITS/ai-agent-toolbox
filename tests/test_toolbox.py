@@ -27,7 +27,7 @@ def test_use_tool_happy_path():
 
     result = toolbox.use(event)
     mock_fn.assert_called_once_with(thoughts="test thoughts")
-    assert result == "Called successfully"
+    assert result.result == "Called successfully"
 
 
 def test_use_tool_missing_tool():
@@ -125,8 +125,8 @@ def test_type_conversion():
         is_tool_call=True
     )
     
-    result = toolbox.use(event)
-    assert result == {
+    response = toolbox.use(event)
+    assert response.result == {
         "int_arg": 42,
         "float_arg": 3.14,
         "bool_arg": True
