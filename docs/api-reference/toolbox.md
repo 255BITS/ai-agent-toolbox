@@ -45,6 +45,7 @@ for event in events:
     if event.is_tool_call:
         response = toolbox.use(event)
         if response:
+            # See ToolResponse documentation for full details
             print(f"""
 Tool used: {response.tool.name}
 Arguments: {response.tool.args}
