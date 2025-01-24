@@ -4,7 +4,8 @@ from .parsers.xml.flat_xml_parser import FlatXMLParser
 from .formatters.xml.xml_prompt_formatter import XMLPromptFormatter
 from .formatters.xml.flat_xml_prompt_formatter import FlatXMLPromptFormatter
 from .parser_event import ParserEvent
+from .tool_response import ToolResponse
 
 __all__ = [
-    "Toolbox", "XMLParser", "FlatXMLParser", "ParserEvent", "XMLPromptFormatter", "FlatXMLPromptFormatter"
+    "Toolbox", "ParserEvent", "ToolResponse", "XMLParser", "FlatXMLParser", "XMLPromptFormatter", "FlatXMLPromptFormatter"
 ]

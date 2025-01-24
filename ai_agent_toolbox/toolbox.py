@@ -1,5 +1,6 @@
 from typing import Any, Callable, Dict, Optional
 from .parser_event import ParserEvent, ToolUse
+from .tool_response import ToolResponse
 import inspect
 
 class ToolConflictError(Exception):
@@ -22,28 +23,32 @@ class Toolbox:
             "description": description,
         }
 
-    # Synchronous execution
-    def use(self, event: ParserEvent) -> Optional[Any]:
+    def use(self, event: ParserEvent) -> Optional[ToolResponse]:
         """For sync tool execution only"""
         tool_data = self._get_tool_data(event)
         if not tool_data:
-            return None
+            return None # Still return None if not a valid tool event
 
         if tool_data["is_async"]:
             raise RuntimeError(f"Async tool {event.tool.name} called with sync use(). Call use_async() instead.")
 
-        return tool_data["fn"](**tool_data["processed_args"])
+        tool_result = tool_data["fn"](**tool_data["processed_args"])
+        return ToolResponse(
+            tool=event.tool,
+            result=tool_result
+        )
 
-    # Asynchronous execution
-    async def use_async(self, event: ParserEvent) -> Optional[Any]:
+    async def use_async(self, event: ParserEvent) -> Optional[ToolResponse]:
         """For both sync and async tools"""
-        tool_data = self._get_tool_data(event)
-        if not tool_data:
-            return None
-
+        # ... (similar logic as use, but use await for async calls) ...
         if tool_data["is_async"]:
-            return await tool_data["fn"](**tool_data["processed_args"])
-        return tool_data["fn"](**tool_data["processed_args"])
+            tool_result = await tool_data["fn"](**tool_data["processed_args"])
+        else:
+            tool_result = tool_data["fn"](**tool_data["processed_args"])
+        return ToolResponse(
+            tool_name=event.tool.name,
+            result=tool_result
+        )
 
     def _get_tool_data(self, event: ParserEvent) -> Optional[Dict]:
         """Shared validation and argument processing"""
