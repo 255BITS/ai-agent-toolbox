@@ -27,7 +27,7 @@ class Toolbox:
         """For sync tool execution only"""
         tool_data = self._get_tool_data(event)
         if not tool_data:
-            return None # Still return None if not a valid tool event
+            return None
 
         if tool_data["is_async"]:
             raise RuntimeError(f"Async tool {event.tool.name} called with sync use(). Call use_async() instead.")
@@ -40,7 +40,9 @@ class Toolbox:
 
     async def use_async(self, event: ParserEvent) -> Optional[ToolResponse]:
         """For both sync and async tools"""
-        # ... (similar logic as use, but use await for async calls) ...
+        tool_data = self._get_tool_data(event)
+        if not tool_data:
+            return None
         if tool_data["is_async"]:
             tool_result = await tool_data["fn"](**tool_data["processed_args"])
         else:
