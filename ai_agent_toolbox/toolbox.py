@@ -54,7 +54,7 @@ class Toolbox:
         if tool_name not in self._tools:
             return None
 
-        tool_data = self._tools[tool_name].copy()
+        tool_data = {**self._tools[tool_name]}  # Shallow copy
         processed_args = {}
         
         for arg_name, arg_schema in tool_data["args"].items():

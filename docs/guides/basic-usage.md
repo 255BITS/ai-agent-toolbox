@@ -11,7 +11,7 @@ def search_database(query: str, limit: int = 10):
     # Implementation
     return results
 
-toolbox.add_tool(
+toolbox.add_tool( 
     name="search",
     fn=search_database,
     args={
