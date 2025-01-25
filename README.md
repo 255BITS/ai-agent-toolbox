@@ -48,7 +48,7 @@ TODO example
 Anthropic can support native tool use, or you can parse the response that comes back.
 
 ```python
-TODO example
+TODO example. Note remove this section for 0.1
 ```
 
 #### OpenAI tooling
@@ -56,7 +56,7 @@ TODO example
 OpenAI uses swagger definitions. You can support native OpenAI tooling as follows:
 
 ```python
-TODO example
+TODO example. Note remove this section for 0.1
 ```
 
 #### Local tooling
