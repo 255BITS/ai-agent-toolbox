@@ -19,47 +19,50 @@ AI Agent Toolbox is meant to be stable, reliable, and easy to master.
 
 ## Installation
 
-```
-pip install ai-agent-toolbox(TODO)
+```bash
+pip install ai-agent-toolbox
 ```
 
 ## Examples
 
-See our [examples](examples) folder for more!
+See our [examples folder](https://github.com/255BITS/ai-agent-toolbox/tree/main/examples) for:
+- Simple tool usage
+- Streaming integration
+- Read-write tools with feedback loops
+- Agent workflow examples
 
 ## Usage
 
 ### Asynchronous
 
 ```python
-TODO example
+from ai_agent_toolbox import Toolbox, XMLParser
+from examples.util import anthropic_stream
+
+async def main():
+    toolbox = Toolbox()
+    parser = XMLParser(tag="tool")
+    # Add tools and handle streaming responses
+    async for chunk in anthropic_stream(...):
+        for event in parser.parse_chunk(chunk):
+            await toolbox.use_async(event)
 ```
 
 ### Synchronous
 
 ```python
-TODO example
+from ai_agent_toolbox import Toolbox, XMLParser
+
+# Initialize components
+toolbox = Toolbox()
+parser = XMLParser(tag="tool")
+# Parse and execute tools
+events = parser.parse(llm_response)
+for event in events:
+    toolbox.use(event)
 ```
 
-### Native Providers
-
-#### Anthropic tooling
-
-Anthropic can support native tool use, or you can parse the response that comes back.
-
-```python
-TODO example. Note remove this section for 0.1
-```
-
-#### OpenAI tooling
-
-OpenAI uses swagger definitions. You can support native OpenAI tooling as follows:
-
-```python
-TODO example. Note remove this section for 0.1
-```
-
-#### Local tooling
+### Local Tooling
 
 This supports other providers and open source models. Here you parse the results yourself.
 
@@ -67,8 +70,23 @@ This supports other providers and open source models. Here you parse the results
 
 Some tools, such as search, may want to give the AI information for further action. This involves crafting a new prompt to the LLM includes any tool responses. We make this easy.
 
-```python
-# TODO Example
+```python 
+from ai_agent_toolbox import ToolResponse
+
+def search_tool(query: str):
+    return f"Results for {query}"
+
+# In your agent loop:
+responses = [r.result for r in tool_responses if r.result]
+new_prompt = f"Previous tool outputs:\n{'\n'.join(responses)}\n{original_prompt}"
+
+# Execute next LLM call with enriched prompt
+next_response = llm_call(
+    system_prompt=system,
+    prompt=new_prompt
+)
+# Continue processing...
+
 ```
 
 ## Agent loops
@@ -83,7 +101,6 @@ Workflows and agent loops involve multiple calls to a LLM provider.
 * Start simple and expand. You can test with static strings to ensure your tools are working correctly.
 
 ## Ecosystem
-
 ### Used by
 * [https://github.com/255BITS/ai-agent-examples](https://github.com/255BITS/ai-agent-examples) - A repository of examples of agentic workflows
 * [https://github.com/255BITS/gptdiff](https://github.com/255BITS/gptdiff) - AI automatically create diffs and applies them
