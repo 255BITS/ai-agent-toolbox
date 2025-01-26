@@ -33,33 +33,60 @@ See our [examples folder](https://github.com/255BITS/ai-agent-toolbox/tree/main/
 
 ## Usage
 
-### Asynchronous
+### Asynchronous (Streaming)
 
 ```python
 from ai_agent_toolbox import Toolbox, XMLParser
 from examples.util import anthropic_stream
 
 async def main():
+    # Initialize components
     toolbox = Toolbox()
     parser = XMLParser(tag="tool")
-    # Add tools and handle streaming responses
+    
+    # Register tools (add your actual tools here)
+    toolbox.add_tool(
+        name="search",
+        fn=lambda query: f"Results for {query}",
+        args={"query": {"type": "string"}},
+        description="Web search tool"
+    )
+
+    # Simulated streaming response from LLM
     async for chunk in anthropic_stream(...):
+        # Parse each chunk as it arrives
         for event in parser.parse_chunk(chunk):
-            await toolbox.use_async(event)
+            if event.is_tool_call:
+                print(f"Executing tool: {event.tool.name}")
+                await toolbox.use_async(event)  # Handle async tools
 ```
 
-### Synchronous
+### Synchronous (Complete Response)
 
 ```python
 from ai_agent_toolbox import Toolbox, XMLParser
+from examples.util import anthropic_stream
 
-# Initialize components
-toolbox = Toolbox()
-parser = XMLParser(tag="tool")
-# Parse and execute tools
-events = parser.parse(llm_response)
-for event in events:
-    toolbox.use(event)
+async def main():
+    # Initialize components
+    toolbox = Toolbox()
+    parser = XMLParser(tag="tool")
+    
+    # Register tools (add your actual tools here)
+    toolbox.add_tool(
+        name="search",
+        fn=lambda query: f"Results for {query}",
+        args={"query": {"type": "string"}},
+        description="Web search tool"
+    )
+
+    # Simulated streaming response from LLM
+    async for chunk in anthropic_stream(...):
+        # Parse each chunk as it arrives
+        for event in parser.parse_chunk(chunk):
+            if event.is_tool_call:
+                print(f"Executing tool: {event.tool.name}")
+                await toolbox.use_async(event)  # Handle async tools
 ```
 
 ### Local Tooling

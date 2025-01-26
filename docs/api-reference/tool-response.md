@@ -9,8 +9,6 @@
 class ToolResponse:
     tool: ToolUse         # Tool invocation details (name and arguments)
     result: Optional[Any] # Return value from tool execution
-    error: Optional[Exception] # Any exception raised during execution
-    message: Optional[str] # Optional human-readable status message
 ```
 
 ## Key Features
