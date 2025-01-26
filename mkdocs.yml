@@ -52,6 +52,7 @@ nav:
     - api-reference/toolbox.md
     - api-reference/parsers.md
     - api-reference/tool-response.md
+    - api-reference/tool-use.md
     - api-reference/formatters.md
   - Guides:
     - guides/basic-usage.md
