@@ -18,6 +18,15 @@ class Toolbox:
     """
 ```
 
+### Types
+
+When adding a tool, `args` can have any of the following type:
+
+* "int" - integer value
+* "float" - floating point value
+* "bool" - boolean(true or false)
+* "string" - text
+
 ### Example Registration
 
 ```python
@@ -31,7 +40,7 @@ toolbox.add_tool(
     fn=image_generate,
     args={
         "prompt": {"type": "string", "description": "Image description"},
-        "style": {"type": "string", "enum": ["realistic", "cartoon"]}
+        "style": {"type": "string", "description": "realistic or cartoon"}
     },
     description="Text-to-image generation tool"
 )

@@ -79,10 +79,10 @@ class Toolbox:
     @staticmethod
     def _convert_arg(value: str, arg_type: str) -> Any:
         """Converts string arguments to specified types"""
-        if arg_type == "integer":
+        if arg_type == "int":
             return int(value)
-        if arg_type == "number":
+        if arg_type == "float":
             return float(value)
-        if arg_type == "boolean":
+        if arg_type == "bool":
             return value.lower() in ("true", "1", "yes")
         return value  # Default to string

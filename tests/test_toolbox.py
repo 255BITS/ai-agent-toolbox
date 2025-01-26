@@ -104,9 +104,9 @@ def test_type_conversion():
         name="converter",
         fn=lambda **x: x,
         args={
-            "int_arg": {"type": "integer"},
-            "float_arg": {"type": "number"},
-            "bool_arg": {"type": "boolean"}
+            "int_arg": {"type": "int"},
+            "float_arg": {"type": "float"},
+            "bool_arg": {"type": "bool"}
         }
     )
     

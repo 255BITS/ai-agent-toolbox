@@ -25,7 +25,7 @@ toolbox.add_tool(
 system = "You are a thinking AI. You have interesting thoughts.\n"
 prompt = "Think about something interesting."
 
-# Add our usage prompt
+# Add instructions on using the available tools to the AI system prompt
 system += formatter.usage_prompt(toolbox)
 
 response = anthropic_llm_call(system_prompt=system, prompt=prompt)
