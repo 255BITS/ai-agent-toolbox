@@ -20,5 +20,4 @@ jobs:
           pip install -r requirements.txt
       - name: Deploy docs
         run: |
-          cd docs
           mkdocs gh-deploy --force
