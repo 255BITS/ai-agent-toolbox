@@ -6,5 +6,3 @@ from .parser_event import ToolUse
 class ToolResponse:
     tool: ToolUse
     result: Optional[Any] = None
-    error: Optional[Exception] = None
-    message: Optional[str] = None # Optional message for more context
