@@ -153,7 +153,6 @@ next_response = llm_call(
 
 ## Benefits
 
-```
 | Feature/Capability          | AI Agent Toolbox ✅ | Naive Regex ❌ | Standard XML Parsers ❌ |
 |-----------------------------|---------------------|----------------|-------------------------|
 | **Streaming Support**        | ✅ Chunk-by-chunk processing | ❌ Full text required | ❌ DOM-based requires full document |
@@ -168,7 +167,6 @@ next_response = llm_call(
 | **Memory Safety**            | ✅ Guardrails against OOM | ❌ Unbounded buffers | ❌ DOM explosion risk |
 | **LLM Output Optimized**     | ✅ Tolerates unclosed tags | ❌ Fails on partials | ❌ Strict tag matching |
 | **Tool Feedback Loops**      | ✅ ToolResponse chaining | ❌ Manual stitching | ❌ No built-in concept |
-```
 
 ## Agent loops
 
