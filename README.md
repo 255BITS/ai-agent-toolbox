@@ -19,8 +19,7 @@ AI Agent Toolbox is meant to be stable, reliable, and easy to master.
 
 ## Documentation
 
-See the full documentation available here:
-[https://255bits.github.io/ai-agent-toolbox/](https://255bits.github.io/ai-agent-toolbox/)
+See the [full documentation](https://255bits.github.io/ai-agent-toolbox/)
 
 ## Installation
 
