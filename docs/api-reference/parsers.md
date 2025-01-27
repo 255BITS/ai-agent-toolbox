@@ -30,15 +30,18 @@ class XMLParser:
 ```python
     from ai_agent_toolbox import XMLParser
     parser = XMLParser(tag="tool")
-    events = parser.parse("<tool><name>search</name><query>AI news</query></tool>")
+    events = parser.parse("Searching... <tool><name>search</name><query>AI news</query></tool>")
 ```
 ### Example Output
 
 ```python
 [
-    ParserEvent(type='tool', name='search', mode='create', id='1', is_tool_call=False),
-    ParserEvent(type='tool', name='search', mode='append', id='1', content='Analyze user request'), TODO
-    ParserEvent(type='tool', name='search', mode='close', id='1', is_tool_call=True, tool=ToolUse(name='think'))
+    ParserEvent(type='text', mode='create', id='04a5e0b5-3c06-4a53-859e-90f8f28d400b', tool=None, is_tool_call=False, content=None),
+    ParserEvent(type='text', mode='append', id='04a5e0b5-3c06-4a53-859e-90f8f28d400b', tool=None, is_tool_call=False, content='Searching... '),
+    ParserEvent(type='text', mode='close', id='04a5e0b5-3c06-4a53-859e-90f8f28d400b', tool=None, is_tool_call=False, content=None),
+    ParserEvent(type='tool', mode='create', id='0ebfb6ac-98d0-4d01-9228-08a1826fce32', tool=None, is_tool_call=False, content='search'),
+    ParserEvent(type='tool', mode='append', id='0ebfb6ac-98d0-4d01-9228-08a1826fce32', tool=None, is_tool_call=False, content='AI news'),
+    ParserEvent(type='tool', mode='close', id='0ebfb6ac-98d0-4d01-9228-08a1826fce32', tool=ToolUse(name='search', args={'query': 'AI news'}), is_tool_call=True, content=None)
 ]
 ```
 
@@ -63,16 +66,16 @@ class FlatXMLParser:
 ```python
 from ai_agent_toolbox import FlatXMLParser
 parser = FlatXMLParser("search")
-events = parser.parse("<search>AI news</action>")
+events = parser.parse("<search>AI news</search>")
 ```
 
 ### Example Output
 
 ```python
 [
-    ParserEvent(type='tool', name='action', mode='create', id='1', is_tool_call=False),
-    ParserEvent(type='tool', name='action', mode='append', id='1', content='AI news'),
-    ParserEvent(type='tool', name='action', mode='close', id='1', is_tool_call=True, content='AI news')
+    ParserEvent(type='tool', mode='create', id='8b62426a-9bca-40e0-a9da-b2a57c6e3ba3', tool=None, is_tool_call=False, content=None),
+    ParserEvent(type='tool', mode='append', id='8b62426a-9bca-40e0-a9da-b2a57c6e3ba3', tool=None, is_tool_call=False, content='AI news'),
+    ParserEvent(type='tool', mode='close', id='8b62426a-9bca-40e0-a9da-b2a57c6e3ba3', tool=ToolUse(name='search', args={'content': 'AI news'}), is_tool_call=True, content='AI news')
 ]
 ```
 
