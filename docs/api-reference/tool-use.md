@@ -1,10 +1,9 @@
 # Tool Use
 
-`ToolUse` objects represent invocations of tools by an AI agent. They capture:
+`ToolUse` objects represent invocations of tools by an AI agent.
 
 - **Tool Name**: Identifier for the registered tool
 - **Arguments**: Key-value pairs of parameters
-- **Execution Metadata**: Context about when/why the tool was called
 
 ## Structure
 
@@ -12,7 +11,7 @@
 @dataclass
 class ToolUse:
     name: str
-    args: Dict[str, Any] = field(default_factory=dict)
+    args: Dict[str, Any]
 ```
 
 ## Creation Flow

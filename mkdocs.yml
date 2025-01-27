@@ -56,5 +56,3 @@ nav:
     - api-reference/formatters.md
   - Guides:
     - guides/basic-usage.md
-    - guides/anthropic.md
-    - guides/openai.md

@@ -59,6 +59,5 @@ for event in events:
 Tool used: {response.tool.name}
 Arguments: {response.tool.args}
 Result: {response.result}
-Error: {response.error}
 """)
 ```

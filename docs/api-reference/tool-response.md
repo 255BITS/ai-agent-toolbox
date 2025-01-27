@@ -1,6 +1,6 @@
 # Tool Response
 
-`ToolResponse` objects encapsulate the complete outcome of tool executions, including results, errors, and contextual metadata.
+`ToolResponse` objects encapsulate the complete outcome of tool executions and contextual metadata.
 
 ## Structure
 
