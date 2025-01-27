@@ -49,7 +49,7 @@ for event in events:
     toolbox.use(event)
 ```
 
-There are many more examples in the `examples` folder, viewable on github - [link][https://github.com/255BITS/ai-agent-toolbox/examples].
+There are many more examples in the `examples` folder, viewable on github - [link](https://github.com/255BITS/ai-agent-toolbox/examples).
 
 ## Getting Started
 
