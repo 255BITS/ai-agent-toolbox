@@ -8,7 +8,6 @@ class XMLPromptFormatter(PromptFormatter):
     """
     def __init__(self, tag="tool"):
         self.tag = tag
-        self.feedback_buffer = None
 
     def format_prompt(self, tools: Dict[str, Dict[str, str]]) -> str:
         lines = [f"You can invoke the following tools using <{self.tag}>:"]
@@ -49,6 +48,4 @@ class XMLPromptFormatter(PromptFormatter):
         Generates a prompt explaining tool usage and argument schemas from a Toolbox.
         """
         base_prompt = self.format_prompt(toolbox._tools)
-        if self.feedback_buffer:
-            return f"{base_prompt}\n\n{self._format_feedback()}"
         return base_prompt
