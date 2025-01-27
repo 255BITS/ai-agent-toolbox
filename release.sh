@@ -1,5 +1,6 @@
 #!/bin/bash
 
+rm -rf dist
 set -e
 
 # Check arguments
