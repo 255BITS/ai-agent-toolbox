@@ -54,5 +54,3 @@ nav:
     - api-reference/tool-response.md
     - api-reference/tool-use.md
     - api-reference/formatters.md
-  - Guides:
-    - guides/basic-usage.md
