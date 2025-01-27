@@ -1,7 +1,7 @@
 # AI Agent Toolbox
 
 <figure>
-  <img src="https://github.com/255BITS/ai-agent-toolbox/blob/main/docs/ai-agent-toolbox-logo.jpg" alt="AI Agent Toolbox Logo" width="300">
+  <img src="https://raw.githubusercontent.com/255BITS/ai-agent-toolbox/main/docs/ai-agent-toolbox-logo.jpg" alt="AI Agent Toolbox Logo" width="300">
 </figure>
 
 AI Agent Toolbox makes AI tool usage across models and frameworks easy. For use with parsing single responses or in agent loops and workflow.
