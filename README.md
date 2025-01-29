@@ -188,6 +188,7 @@ Workflows and agent loops involve multiple calls to a LLM provider.
 * [https://github.com/255BITS/ai-agent-examples](https://github.com/255BITS/ai-agent-examples) - A repository of examples of agentic workflows
 * [https://github.com/255BITS/gptdiff](https://github.com/255BITS/gptdiff) - CLI and API to automatically create diffs and apply them
 * [https://github.com/255BITS/filecannon](https://github.com/255BITS/filecannon) - CLI to generate files with AI
+* [https://github.com/255BITS/appcannon](https://github.com/255BITS/appcannon) - A universal app generator for generating entire projects using AI
 
 ## License
 
