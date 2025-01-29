@@ -234,3 +234,38 @@ def test_streaming_unclosed_tool(parser):
     assert len(tool_events) == 1
     assert tool_events[0].tool.name == "test"
     assert tool_events[0].tool.args == {"arg": "value"}
+
+def test_complex_nested_content(parser):
+    """Test handling complex nested content within a tool."""
+    input_text = """<use_tool>
+        <name>write_file</name>
+        <path>index.html</path>
+        <content><!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <title>Test</title>
+        </head>
+        <body>
+            <h1>Hello, World!</h1>
+        </body>
+        </html></content>
+    </use_tool>
+    """
+    
+    events = list(parser.parse(input_text))
+    
+    # Verify sequence of events
+    assert len(events) >= 6  # Ensure parser handles all necessary events
+    
+    # Tool creation
+    assert_tool_create(events[0])
+    tool_id = events[0].id
+    assert_tool_append(events[1], tool_id, "path", "index.html")
+    
+    # Verify <content> is treated as a single argument
+    assert events[2].mode == "append"
+    
+    # Tool closure
+    pprint(events)
+    assert_tool_close(events[3], tool_id)
