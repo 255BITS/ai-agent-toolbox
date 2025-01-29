@@ -164,7 +164,7 @@ next_response = llm_call(
 | **Flexible Tool Format**     | ✅ Supports multiple tool use formats | ❌ Brittle pattern matching | ❌ Requires schema validation |
 | **Automatic Type Conversion**| ✅ String→int/float/bool | ❌ Manual casting needed | ❌ Returns only strings |
 | **Error Recovery**           | ✅ Heals partial/malformed tags | ❌ Fails on first mismatch | ❌ Aborts on validation errors |
-| **Battle Tested**            | ✅ 142+ test cases | ❌ Ad-hoc testing | ❌ Generic XML cases only |
+| **Battle Tested**            | ✅ Heavily tested | ❌ Ad-hoc testing | ❌ Generic XML cases only |
 | **Tool Schema Enforcement**  | ✅ Args + types validation | ❌ No validation | ❌ Only structural validation |
 | **Mixed Content Handling**   | ✅ Text + tools interleaved | ❌ Captures block text | ❌ Text nodes require special handling |
 | **Async Ready**              | ✅ Native async/sync support | ❌ Callback hell | ❌ Sync-only typically |
