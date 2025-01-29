@@ -135,59 +135,79 @@ class ToolParser:
     def _parse_tool_arguments(self, text: str) -> int:
         """
         Parse argument data in `text` and return how many characters we fully consumed.
-        We'll look for <argName>...</argName> pairs, or treat untagged content
-        as literal argument text if inside an arg.
-
-        If we hit a partial tag, we stop parsing and return the index
-        of the last fully consumed character.
+        Once we see <argName>, we read all text (including nested '<') until </argName>.
+        If we see a closing tag </argName>, that ends the current argument.
+        We do partial parsing if we don't yet have a closing tag.
         """
         i = 0
         length = len(text)
 
         while i < length:
+            # Look for a '<'
             lt_index = text.find("<", i)
             if lt_index == -1:
-                # No more '<', so the remainder is argument text
+                # No more angle brackets -> treat the remainder as text for the current arg
                 remainder = text[i:]
                 self._append_tool_arg(remainder)
                 i = length
                 break
 
-            # The chunk up to the next '<' is literal text for the current arg
+            # Up to the next '<' is literal text for the current arg
             if lt_index > i:
                 literal = text[i:lt_index]
                 self._append_tool_arg(literal)
                 i = lt_index
 
-            # Attempt to parse a full tag. We need a '>' to complete it.
+            # Try to parse a full tag <...>
             gt_index = text.find(">", lt_index + 1)
             if gt_index == -1:
-                # We have a partial tag "<something" with no closing '>' yet.
-                # We'll wait for more data. Nothing beyond i is fully consumed.
+                # We have a partial "<..." with no closing '>', so stop here
                 break
 
-            # We have a complete tag from lt_index..gt_index
-            full_tag = text[lt_index + 1:gt_index].strip()  # what's inside <...>
-            i = gt_index + 1  # advance past '>'
+            # Extract what's inside <...> (strip whitespace)
+            full_tag = text[lt_index + 1:gt_index].strip()
+            i = gt_index + 1  # move past '>'
 
             if full_tag.startswith("/"):
-                # It's a closing tag, e.g. </thoughts>
+                # It's a closing tag, e.g. </content>
                 tag_name = full_tag[1:].strip()
                 # If it matches the current arg, close it
                 if self.current_arg_name == tag_name:
                     self._close_tool_arg()
                 else:
-                    # Possibly mismatched or unknown closing tag;
-                    # we close any open arg to avoid confusion.
+                    # Possibly mismatched tag; just close whatever we had open
                     if self.current_arg_name:
                         self._close_tool_arg()
             else:
-                # It's an opening tag, e.g. <thoughts>
-                # If there's an arg already open, we close it before opening a new one
+                # It's an opening tag, e.g. <content>
+                arg_name = full_tag
+
+                # If we already had an arg open, close it first
                 if self.current_arg_name:
                     self._close_tool_arg()
-                arg_name = full_tag
+
+                # Start a new argument
                 self._start_tool_arg(arg_name)
+
+                # Now we want to read everything until we find the matching </arg_name>.
+                end_tag = f"</{arg_name}>"
+                end_pos = text.find(end_tag, i)
+                if end_pos == -1:
+                    # We don't yet have the closing tag -> partial parse
+                    # Everything from i to the end is argument text
+                    inner_text = text[i:]
+                    self._append_tool_arg(inner_text)
+                    i = length  # done reading this chunk
+                    break
+                else:
+                    # We found the matching closing tag.
+                    # Everything from i up to end_pos is the argument content.
+                    inner_text = text[i:end_pos]
+                    self._append_tool_arg(inner_text)
+                    # Now move past `</arg_name>` 
+                    i = end_pos + len(end_tag)
+                    # And close the argument
+                    self._close_tool_arg()
 
         return i
 
