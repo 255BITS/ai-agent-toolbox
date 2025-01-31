@@ -86,10 +86,11 @@ def test_argument_line_static_text():
     tools = {
         "tool_with_args": {
             "description": "Tool with arguments",
-            "args": {"param": {"type": "int"}}  # Args exist but not reflected in prompt
+            "content": {"type": "string", "description": "test description"}
         }
     }
     formatter = FlatXMLPromptFormatter()
     prompt = formatter.format_prompt(tools)
     
-    assert "Argument: string" in prompt  # Static text remains unchanged
+    assert "Argument: string" in prompt
+    assert "test description" in prompt

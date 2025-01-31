@@ -15,8 +15,10 @@ class FlatXMLPromptFormatter(PromptFormatter):
             lines.extend([
                 f"Tool name: {tool_name}",
                 f"Description: {data['description']}",
-                "Argument: string"
+                "Argument: string",
             ])
+            if data.get('content', {}).get('description', None):
+                lines.extend([f"Argument description: {data['content']['description']}"])
 
             lines.append("")
 
