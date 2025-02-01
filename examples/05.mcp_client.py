@@ -3,6 +3,7 @@ from ai_agent_toolbox import Toolbox, XMLParser, XMLPromptFormatter
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 from pathlib import Path
+from examples.util import anthropic_llm_call
 
 # Setup
 toolbox = Toolbox()
@@ -21,14 +22,14 @@ def convert_input_schema(inputSchema):
         args[key]={"type": properties[key]["type"], "description": properties[key]['title']}
     return args
 
-async def call_tool(tool):
-    async def _call_tool(*args, **kwargs):
-        pass
-    return _call_tool
-
 async def run():
     async with stdio_client(server_params) as (read, write):
         async with ClientSession(read, write) as session:
+            def call_tool(tool):
+                async def _call_tool(**kwargs):
+                    return await session.call_tool(tool.name, kwargs)
+                return _call_tool
+
             print("Initializing")
             await session.initialize()
             print("Listing tools")
@@ -36,16 +37,19 @@ async def run():
             for tool_tuple in tools:
                 if tool_tuple[0] == "tools":
                     for tool in tool_tuple[1]:
-                        print("tool is", tool)
-                        toolbox.add_tool(name=tool.name, description=tool.description, **convert_input_schema(tool.inputSchema))
-                        print("--", toolbox._tools)
-                #toolbox.add_mcp_tool(tool)
+                        print(f'adding tool "{tool.name}" with arguments {convert_input_schema(tool.inputSchema)}')
+                        toolbox.add_tool(fn=call_tool(tool), name=tool.name, description=tool.description, args=convert_input_schema(tool.inputSchema))
 
-            #response = anthropic_llm_call(system_prompt=system, prompt=prompt)
-            #events = parser.parse(response)
+            system = "You are testing a tool.\n"+formatter.usage_prompt(toolbox)
+            prompt = "Use the tool to add 5 + 7"
+            response = anthropic_llm_call(system_prompt=system, prompt=prompt)
+            events = parser.parse(response)
 
-            #for event in events:
-            #    toolbox.use(event)
+            for event in events:
+                if event.is_tool_call:
+                    print("Calling tool", event.tool)
+                    result = await toolbox.use_async(event)
+                    print("Result", result)
 
 if __name__ == "__main__":
     import asyncio
