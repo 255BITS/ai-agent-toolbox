@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Run the 05.mcp_client.py to test this
 from mcp.server.fastmcp import FastMCP
 
@@ -8,3 +9,4 @@ def add(a: int, b: int) -> int:
     """Add two numbers"""
     return a + b
 
+mcp.run()
