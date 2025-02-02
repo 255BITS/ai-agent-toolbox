@@ -7,25 +7,25 @@ toolbox = Toolbox()
 parser = XMLParser(tag="use_tool")
 formatter = XMLPromptFormatter(tag="use_tool")
 
-async def thinking(thoughts=""):
-    print(f"Thinking: {thoughts}")
+async def yeeting(thoughts=""):
+    print(f"yeeting: {thoughts}")
 
 # Adding tools to your toolbox
 toolbox.add_tool(
-    name="thinking",
-    fn=thinking,
+    name="yeeting",
+    fn=yeeting,
     args={
         "thoughts": {
             "type": "string", 
-            "description": "Anything you want to think about"
+            "description": "Anything you want to yeet about"
         }
     },
-    description="For thinking out loud"
+    description="For yeeting out loud"
 )
 
 async def main():
-    system = "You are a thinking AI. You have interesting thoughts."
-    prompt = "Think about something interesting."
+    system = "You are a yeeting AI. You have interesting yeets."
+    prompt = "Yeet about something interesting."
     system += formatter.usage_prompt(toolbox)
 
     async for chunk in anthropic_stream(system, prompt):

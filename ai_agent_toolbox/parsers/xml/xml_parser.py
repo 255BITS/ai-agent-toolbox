@@ -153,7 +153,7 @@ class XMLParser(Parser):
 
     def flush(self) -> List[ParserEvent]:
         """
-        Called when no more data is expected. 
+        Called when no more data is expected.
         Closes any open text block or partial tool parse.
         """
         flush_events: List[ParserEvent] = []
@@ -180,15 +180,18 @@ class XMLParser(Parser):
             events, done, leftover = self.tool_parser.parse("")
             flush_events.extend(events)
             if not done:
-                # Force-close partial tool usage if needed
-                self._finalize_tool_parser(flush_events)
+                # If no valid tool was created (i.e. no <name> found), discard the tool block
+                if not self.tool_parser.current_tool_id:
+                    # Open a new text block to resume normal parsing; do not emit any tool events.
+                    self._open_text_block()
+                else:
+                    self._finalize_tool_parser(flush_events)
             self.tool_parser = None
             self.state = ParserState.OUTSIDE
 
-            # If leftover text remains after forcibly closing the tool
+            # If leftover text remains after closing the tool, handle it
             if leftover.strip():
                 self._handle_outside(leftover)
-                # close final text if any
                 if self.current_text_id is not None:
                     flush_events.append(
                         ParserEvent(

@@ -269,3 +269,21 @@ def test_complex_nested_content(parser):
     # Tool closure
     pprint(events)
     assert_tool_close(events[3], tool_id)
+
+def test_invalid_tool_argument(parser):
+    """Test that a tool block with invalid content (missing <name>) does not produce a tool call event."""
+    input_text = "<use_tool><invalid>arg</invalid></use_tool>regular text"
+    events = list(parser.parse(input_text))
+    assert len(events) > 0
+
+    # Since no <name> tag is provided, the tool parser never creates a tool.
+    tool_events = [e for e in events if e.is_tool_call]
+    assert len(tool_events) == 0
+
+    # Additionally, verify that no text event contains the invalid tag.
+    text_events = [e for e in events if e.type == "text" and e.mode == "append"]
+    content = ""
+    for event in text_events:
+        assert "<invalid>" not in event.content
+        content += event.content
+    assert "regular text" in content

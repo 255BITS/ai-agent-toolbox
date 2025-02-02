@@ -75,16 +75,21 @@ class ToolParser:
 
     def _parse_waiting_for_name(self):
         """
-        Look for a complete <name>...</name> block. If not found, do nothing;
-        if partially found, keep the partial buffer for the next chunk.
-        Once we have the name, move to HAS_NAME state.
+        Look for a complete <name>...</name> block. If not found, and if the tool block
+        has ended (i.e. </use_tool> is present), then discard the tool block as invalid.
         """
         start_tag = "<name>"
         end_tag = "</name>"
 
         start_idx = self.buffer.find(start_tag)
         if start_idx == -1:
-            # Possibly partial or no <name> yet; do nothing.
+            # No <name> tag found.
+            # If the end tag for the tool is present, discard the invalid tool block.
+            end_tool_idx = self.buffer.find(self.end_tag)
+            if end_tool_idx != -1:
+                # Discard everything up to and including the end tag.
+                self.buffer = self.buffer[end_tool_idx + len(self.end_tag):]
+                self.state = ToolParserState.DONE
             return
 
         close_idx = self.buffer.find(end_tag, start_idx + len(start_tag))
