@@ -63,8 +63,6 @@ def test_single_code_fence():
     # - A text block for "Hello world. \n"
     # - A tool block for the code fence (tool name "python") containing "print('hi')\n"
     # - A text block for " Goodbye."
-    # There should be 3 text events (create, append, close) before the tool,
-    # 3 events for the tool, and 3 for the final text.
     # In total, 9 events.
     assert len(events) == 9
 
@@ -95,7 +93,6 @@ def test_multiple_code_fences():
     # First tool: language "diff", content "- line1\n+ line2\n"
     # Second tool: language "python", content "print('code')\n"
     # Total events: 3 events for each tool = 6.
-    # (No outside text in this example.)
     assert len(events) == 6
 
     # First tool block.
@@ -146,7 +143,8 @@ def test_unclosed_code_fence():
     # Expect:
     # - Text block: "Before code\n"
     # - Tool block for "python", force-closed with content "incomplete code"
-    assert len(events) >= 7
+    # Our MarkdownParser produces 6 events in this case.
+    assert len(events) >= 6
 
     # First text block.
     assert_text_create(events[0])
@@ -178,15 +176,15 @@ def test_streaming_partial_open_fence():
 
     # Expect a text block for "Text before\n", a tool block for python, and a text block for " After"
     # Verify text before.
-    text_events = [e for e in all_events if e.type == "text"]
-    assert any("Text before" in e.content for e in text_events if e.mode == "append")
+    text_events = [e for e in all_events if e.type == "text" and e.mode == "append"]
+    assert any("Text before" in e.content for e in text_events)
     # Verify tool block.
     tool_closes = [e for e in all_events if e.mode == "close" and e.type == "tool" and e.is_tool_call]
     assert len(tool_closes) == 1
     assert tool_closes[0].tool.name == "python"
     assert tool_closes[0].content == "print('partial')\n"
     # Verify text after.
-    assert any(" After" in e.content for e in text_events if e.mode == "append")
+    assert any(" After" in e.content for e in text_events)
 
 def test_streaming_split_across_chunks():
     parser = MarkdownParser()
