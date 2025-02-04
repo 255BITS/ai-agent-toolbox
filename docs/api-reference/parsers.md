@@ -62,22 +62,37 @@ class FlatXMLParser:
 ```
 
 ### Example Usage
-
 ```python
 from ai_agent_toolbox import FlatXMLParser
 parser = FlatXMLParser("search")
 events = parser.parse("<search>AI news</search>")
 ```
 
-### Example Output
+## MarkdownParser
+
+The `MarkdownParser` is a streaming parser for Markdown code fences that treats code blocks as tool calls.
+It supports code fences with an optional language identifier (e.g. ```python) and treats all text outside
+the code fences as plain text.
+
+### Methods
+
+* `parse(text: str) -> List[ParserEvent]`: Parses the complete Markdown text.
+* `parse_chunk(chunk: str) -> List[ParserEvent]`: Processes a chunk of Markdown text in streaming scenarios.
+* `flush() -> List[ParserEvent]`: Finalizes parsing by forcing the closure of any open code fence.
+
+### Example Usage
 
 ```python
-[
-    ParserEvent(type='tool', mode='create', id='8b62426a-9bca-40e0-a9da-b2a57c6e3ba3', tool=None, is_tool_call=False, content=None),
-    ParserEvent(type='tool', mode='append', id='8b62426a-9bca-40e0-a9da-b2a57c6e3ba3', tool=None, is_tool_call=False, content='AI news'),
-    ParserEvent(type='tool', mode='close', id='8b62426a-9bca-40e0-a9da-b2a57c6e3ba3', tool=ToolUse(name='search', args={'content': 'AI news'}), is_tool_call=True, content='AI news')
-]
+from ai_agent_toolbox.parsers.markdown.markdown_parser import MarkdownParser
+
+parser = MarkdownParser()
+markdown_text = "Hello world.\n```python\nprint('Hi')\n```"
+events = parser.parse(markdown_text)
+for event in events:
+    print(event)
 ```
+
+The parser emits `ParserEvent` objects with `type` set to `"text"` for regular content and `"tool"` for code blocks.
 
 ## ParserEvent
 
