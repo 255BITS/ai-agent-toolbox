@@ -68,6 +68,15 @@ parser = FlatXMLParser("search")
 events = parser.parse("<search>AI news</search>")
 ```
 
+### Example Output
+```python
+[
+    ParserEvent(type='tool', mode='create', id='8b62426a-9bca-40e0-a9da-b2a57c6e3ba3', tool=None, is_tool_call=False, content=None),
+    ParserEvent(type='tool', mode='append', id='8b62426a-9bca-40e0-a9da-b2a57c6e3ba3', tool=None, is_tool_call=False, content='AI news'),
+    ParserEvent(type='tool', mode='close', id='8b62426a-9bca-40e0-a9da-b2a57c6e3ba3', tool=ToolUse(name='search', args={'content': 'AI news'}), is_tool_call=True, content='AI news')
+]
+```
+
 ## MarkdownParser
 
 The `MarkdownParser` is a streaming parser for Markdown code fences that treats code blocks as tool calls.
