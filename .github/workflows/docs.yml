@@ -1,23 +1,38 @@
 name: Deploy Documentation
+
 on:
   push:
     branches:
-      - main
-    paths:
-      - 'docs/**'  # Only trigger on docs changes
+      - main  # Adjust if needed
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
-        with:
-          python-version: 3.x
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
       - name: Install dependencies
-        run: |
-          cd docs
-          pip install -r requirements.txt
-      - name: Deploy docs
-        run: |
-          mkdocs gh-deploy --force
+        run: pip install mkdocs-material
+
+      - name: Build site
+        run: mkdocs build --site-dir public  # Ensure output is in 'public'
+
+      - name: Ensure CNAME is set
+        run: echo "toolbox.255labs.xyz" > public/CNAME  # Correct location
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public  # This must match the correct output directory
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
