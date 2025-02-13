@@ -25,6 +25,7 @@ class XMLParser(Parser):
         self.tool_parser = ToolParser(tag=tag)
 
         # We define the strings for scanning the outside buffer.
+        self.tag = tag
         self.start_tag = f"<{tag}>"
 
     def parse(self, text: str) -> List[ParserEvent]:
@@ -73,7 +74,7 @@ class XMLParser(Parser):
 
             if done:
                 # If the tool parser is done, we reset it and remain OUTSIDE
-                self.tool_parser = ToolParser(tag=self.tool_parser.tag)
+                self.tool_parser = ToolParser(tag=self.tag)
                 self.state = ParserState.OUTSIDE
                 combined = leftover
             else:
@@ -92,7 +93,7 @@ class XMLParser(Parser):
 
         if done:
             # Tool is done, revert to OUTSIDE
-            self.tool_parser = ToolParser(tag=self.tool_parser.tag)
+            self.tool_parser = ToolParser(tag=self.tag)
             self.state = ParserState.OUTSIDE
             # The leftover might contain more outside text or new tools
             self._handle_outside(leftover)
@@ -176,7 +177,7 @@ class XMLParser(Parser):
             self.current_text_id = None
 
         # If we are in the middle of a tool parse
-        if self.state == ParserState.INSIDE_TOOL and self.tool_parser:
+        if self.state == ParserState.INSIDE_TOOL:
             events, done, leftover = self.tool_parser.parse("")
             flush_events.extend(events)
             if not done:
@@ -186,7 +187,7 @@ class XMLParser(Parser):
                     self._open_text_block()
                 else:
                     self._finalize_tool_parser(flush_events)
-            self.tool_parser = None
+            self.tool_parser = ToolParser(tag=self.tag)
             self.state = ParserState.OUTSIDE
 
             # If leftover text remains after closing the tool, handle it
