@@ -107,6 +107,26 @@ def test_multiple_code_fences():
     assert_tool_append(events[4], tool_id2, "print('code')\n")
     assert_tool_close(events[5], tool_id2, "python", "print('code')\n")
 
+
+def test_nested_backticks():
+    text = """```diff
+--- a/README.md
++++ b/README.md
+@@
+-# GPTDiff
+-#### Apply a Patch Directly
+-```
+-bash
+-gptdiff "Add button animations on press" --apply
+-```
+-✅ Successfully applied patch
+```"""
+    parser = MarkdownParser()
+    events = list(parser.parse(text))
+    tool_id = events[1].id
+    assert_tool_append(events[1], tool_id, text.replace("```diff", "")[:-3])
+    assert len(events) == 9
+
 def test_interleaved_text_and_code():
     parser = MarkdownParser()
     text = "Start text\n```bash\necho 'run'\n```\nEnd text"
