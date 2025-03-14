@@ -143,15 +143,30 @@ class MarkdownParser(Parser):
         self.state = self.STATE_INSIDE
         return events
 
+    def _find_closing_fence_index(self, buf: str) -> int:
+        """
+        Finds the index of a valid closing fence in buf.
+        A valid closing fence must appear at the start of a line (or at index 0).
+        """
+        pos = 0
+        while True:
+            idx = buf.find(self.CLOSE_FENCE, pos)
+            if idx == -1:
+                return -1
+            # Only consider as a fence if at start of buffer or preceded by a newline.
+            if idx == 0 or buf[idx - 1] == "\n":
+                return idx
+            pos = idx + 1
+
     def _parse_inside(self):
         """
-        In the INSIDE state, search for a closing fence. Content up to the fence is
-        appended to the current tool call.
+        In the INSIDE state, search for a closing fence that is at the start of a line.
+        Content up to the fence is appended to the current tool call.
         """
         events = []
-        idx = self.buffer.find(self.CLOSE_FENCE)
+        idx = self._find_closing_fence_index(self.buffer)
         if idx == -1:
-            # No closing fence found.
+            # No valid closing fence found.
             partial_len = self._longest_prefix_at_end(self.buffer, self.CLOSE_FENCE)
             if partial_len:
                 if len(self.buffer) > partial_len:
@@ -181,7 +196,7 @@ class MarkdownParser(Parser):
                     self.buffer = ""
             return events
 
-        # Found a closing fence.
+        # Found a valid closing fence.
         content = self.buffer[:idx]
         if content:
             self.tool_content_buffer.append(content)
