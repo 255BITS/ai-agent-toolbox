@@ -122,7 +122,7 @@ def test_nested_backticks():
     parser = MarkdownParser()
     events = list(parser.parse(text))
     tool_id = events[1].id
-    assert_tool_append(events[1], tool_id, text.replace("```diff", "")[:-3])
+    assert_tool_append(events[1], tool_id, text.replace("```diff\n", "")[:-3])
     assert len(events) == 3
 
 def test_interleaved_text_and_code():
