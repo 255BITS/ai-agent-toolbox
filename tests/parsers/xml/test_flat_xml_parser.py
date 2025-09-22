@@ -1,8 +1,6 @@
 import pytest
 from ai_agent_toolbox.parsers.xml.flat_xml_parser import FlatXMLParser
 from ai_agent_toolbox.parser_event import ParserEvent
-import re
-from pprint import pprint
 
 @pytest.fixture
 def parser():
@@ -175,7 +173,6 @@ def test_interleaved_text(parser):
 def test_unclosed_tag(parser):
     text = "<think>Partially closed"
     events = list(parser.parse(text))
-    pprint(events)
     # We get 3 events for the recognized tag: create, append, close
     assert len(events) == 3
 
