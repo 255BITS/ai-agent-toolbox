@@ -1,7 +1,10 @@
 import json
 from typing import Any, Dict
 
-from ai_agent_toolbox.formatters.prompt_formatter import PromptFormatter
+from ai_agent_toolbox.formatters.prompt_formatter import (
+    PromptFormatter,
+    iter_tool_metadata,
+)
 
 
 class JSONPromptFormatter(PromptFormatter):
@@ -12,36 +15,39 @@ class JSONPromptFormatter(PromptFormatter):
             "You can invoke the following tools by returning JSON objects with type \"tool_call\":",
         ]
 
-        for tool_name, data in tools.items():
-            lines.extend([
-                f"Tool name: {tool_name}",
-                f"Description: {data.get('description', '')}",
-                "Arguments:",
-            ])
+        tool_metadata = list(iter_tool_metadata(tools))
 
-            for arg_name, arg_schema in data.get("args", {}).items():
-                arg_type = arg_schema.get("type", "string")
-                arg_desc = arg_schema.get("description", "")
-                lines.append(f"  {arg_name} ({arg_type}): {arg_desc}")
+        for tool in tool_metadata:
+            lines.extend(
+                [
+                    f"Tool name: {tool.name}",
+                    f"Description: {tool.description}",
+                    "Arguments:",
+                ]
+            )
+
+            for arg in tool.args:
+                lines.append(f"  {arg.name} ({arg.type}): {arg.description}")
 
             lines.append("")
 
         lines.append("Example tool call payloads:")
 
-        for tool_name, data in tools.items():
+        for tool in tool_metadata:
             example_args = {}
-            for idx, (arg_name, arg_schema) in enumerate(data.get("args", {}).items(), start=1):
-                placeholder = f"value{idx}"
-                if arg_schema.get("type") in {"int", "integer"}:
+            for idx, arg in enumerate(tool.args, start=1):
+                placeholder: Any = f"value{idx}"
+                arg_type = str(arg.schema.get("type", "")).lower()
+                if arg_type in {"int", "integer"}:
                     placeholder = idx
-                elif arg_schema.get("type") in {"number", "float"}:
+                elif arg_type in {"number", "float"}:
                     placeholder = float(idx)
-                example_args[arg_name] = placeholder
+                example_args[arg.name] = placeholder
 
             example_payload = {
                 "type": "tool_call",
                 "function": {
-                    "name": tool_name,
+                    "name": tool.name,
                     "arguments": example_args,
                 },
             }

@@ -1,5 +1,9 @@
 from typing import Dict
-from ai_agent_toolbox.formatters.prompt_formatter import PromptFormatter
+
+from ai_agent_toolbox.formatters.prompt_formatter import (
+    PromptFormatter,
+    iter_tool_metadata,
+)
 
 class FlatXMLPromptFormatter(PromptFormatter):
     """
@@ -11,23 +15,28 @@ class FlatXMLPromptFormatter(PromptFormatter):
     def format_prompt(self, tools: Dict[str, Dict[str, str]]) -> str:
         lines = [f"You can invoke the following tools using <{self.tag}>:"]
 
-        for tool_name, data in tools.items():
-            lines.extend([
-                f"Tool name: {tool_name}",
-                f"Description: {data['description']}",
-                "Argument: string",
-            ])
-            if data.get('content', {}).get('description', None):
-                lines.extend([f"Argument description: {data['content']['description']}"])
+        for tool in iter_tool_metadata(tools):
+            lines.extend(
+                [
+                    f"Tool name: {tool.name}",
+                    f"Description: {tool.description}",
+                    "Argument: string",
+                ]
+            )
+
+            if tool.content and tool.content.description:
+                lines.append(f"Argument description: {tool.content.description}")
 
             lines.append("")
 
-        lines.extend([
-            "Example:",
-            f"<{self.tag}>",
-            "arguments",
-            f"</{self.tag}>"
-        ])
+        lines.extend(
+            [
+                "Example:",
+                f"<{self.tag}>",
+                "arguments",
+                f"</{self.tag}>",
+            ]
+        )
 
         return "\n".join(lines)
 
