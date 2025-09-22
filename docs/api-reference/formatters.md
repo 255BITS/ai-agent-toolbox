@@ -27,7 +27,7 @@ Tool name: search
 Description: Web search tool
 Arguments:
   query (string): Search keywords
-  limit (integer): Maximum results to return
+  limit (int): Maximum results to return
 
 Example:
 <use_tool>

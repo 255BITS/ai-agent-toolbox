@@ -15,14 +15,14 @@ Tools themselves are simply functions. They can either by async or normal python
 
 ## Type Conversion System
 
-The Toolbox automatically converts arguments using these mappings:
+The Toolbox automatically converts arguments using these mappings. Supported literal types are `int`, `float`, `bool`, and `string`:
 
-| Input Value | Type      | Result          |
-|-------------|-----------|-----------------|
-| "42"        | integer   | 42 (int)        |
-| "3.14"      | number    | 3.14 (float)    |
-| "true"      | boolean   | True (bool)     |
-| "hello"     | string    | "hello" (str)   |
+| Input Value | Literal Type | Result          |
+|-------------|--------------|-----------------|
+| "42"        | int          | 42 (int)        |
+| "3.14"      | float        | 3.14 (float)    |
+| "true"      | bool         | True (bool)     |
+| "hello"     | string       | "hello" (str)   |
 
 ## Patterns
 
