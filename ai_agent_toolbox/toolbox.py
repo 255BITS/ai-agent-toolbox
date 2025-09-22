@@ -2,12 +2,9 @@ import inspect
 import json
 from typing import Any, Callable, Dict, Optional
 
+from .exceptions import ToolConflictError
 from .parser_event import ParserEvent, ToolUse
 from .tool_response import ToolResponse
-
-class ToolConflictError(Exception):
-    """Raised when trying to register a tool name that already exists"""
-    pass
 
 class Toolbox:
     def __init__(self):

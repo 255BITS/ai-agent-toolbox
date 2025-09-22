@@ -3,7 +3,8 @@ from unittest.mock import Mock
 
 import pytest
 
-from ai_agent_toolbox.toolbox import Toolbox, ToolConflictError
+from ai_agent_toolbox.exceptions import ToolConflictError
+from ai_agent_toolbox.toolbox import Toolbox
 from ai_agent_toolbox.parser_event import ParserEvent, ToolUse
 
 def test_use_tool_happy_path():
