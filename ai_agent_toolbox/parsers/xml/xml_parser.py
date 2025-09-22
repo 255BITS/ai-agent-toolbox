@@ -1,6 +1,7 @@
 from typing import List
 
-from .tool_parser import ToolParser, ToolParserState
+from .tool_parser import ToolParser
+from .tool_parser_state import ToolParserState
 from ai_agent_toolbox.parsers import Parser
 from ai_agent_toolbox.parser_event import ParserEvent
 from ai_agent_toolbox.tool_use import ToolUse

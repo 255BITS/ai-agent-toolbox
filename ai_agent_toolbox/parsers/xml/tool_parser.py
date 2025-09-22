@@ -3,10 +3,7 @@ from typing import Optional, List, Dict
 from ai_agent_toolbox.parser_event import ParserEvent
 from ai_agent_toolbox.tool_use import ToolUse
 
-class ToolParserState:
-    WAITING_FOR_NAME = "waiting_for_name"
-    HAS_NAME = "has_name"
-    DONE = "done"
+from .tool_parser_state import ToolParserState
 
 class ToolParser:
     """
