@@ -76,7 +76,8 @@ class FlatXMLPromptFormatter(PromptFormatter):
     Methods:
         format_prompt(tools: Dict[str, Dict[str, str]]) -> str
             Returns a formatted XML string containing tool details.
-        
+
         usage_prompt(toolbox: Toolbox) -> str
             Generates the XML usage prompt based on the tools registered in a Toolbox.
     """
+```
