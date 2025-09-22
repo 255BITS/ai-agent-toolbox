@@ -39,16 +39,6 @@ class FlatXMLParser(Parser):
         self._tool_id = None
         self._tool_content_buffer = []
 
-    def parse(self, text: str):
-        """
-        Convenience method for parsing all text at once.
-        Returns all events in a single list (non-streaming usage).
-        """
-        events = []
-        events.extend(self.parse_chunk(text))
-        events.extend(self.flush())
-        return events
-
     def parse_chunk(self, chunk: str):
         """
         Consume `chunk` in a streaming-friendly way.

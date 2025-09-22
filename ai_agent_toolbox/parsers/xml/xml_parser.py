@@ -28,11 +28,6 @@ class XMLParser(Parser):
         self.tag = tag
         self.start_tag = f"<{tag}>"
 
-    def parse(self, text: str) -> List[ParserEvent]:
-        # Parse in streaming style, then flush.
-        # Summarize all events.
-        return self.parse_chunk(text) + self.flush()
-
     def parse_chunk(self, chunk: str) -> List[ParserEvent]:
         self.events = []
 
