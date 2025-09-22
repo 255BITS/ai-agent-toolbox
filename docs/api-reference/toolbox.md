@@ -70,7 +70,8 @@ toolbox.add_tool(
 ```python
 import json
 from ai_agent_toolbox import Toolbox
-from ai_agent_toolbox.parser_event import ParserEvent, ToolUse
+from ai_agent_toolbox.parser_event import ParserEvent
+from ai_agent_toolbox.tool_use import ToolUse
 
 def summarize_tasks(tasks, metadata, priority, limit):
     return {

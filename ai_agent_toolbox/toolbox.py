@@ -2,7 +2,8 @@ import inspect
 import json
 from typing import Any, Callable, Dict, Optional
 
-from .parser_event import ParserEvent, ToolUse
+from .parser_event import ParserEvent
+from .tool_use import ToolUse
 from .tool_response import ToolResponse
 
 class ToolConflictError(Exception):
