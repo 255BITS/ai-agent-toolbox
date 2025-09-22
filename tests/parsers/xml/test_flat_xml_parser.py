@@ -240,7 +240,7 @@ def test_streaming_partial_tag(parser):
     # Expect text create, append, close for "Hello "
     # Then tool create, append, append, close for <think>
     # Then text create, append, close for " bye"
-    # => total 9 events
+    # => total 10 events
 
     assert len(all_events) == 10
 
@@ -261,12 +261,7 @@ def test_streaming_partial_tag(parser):
     assert_text_create(all_events[7])
     text_id_2 = all_events[7].id
     assert_text_append(all_events[8], text_id_2, " bye")
-    # Because we used all_events[8], it must be the close event if we follow the standard pattern. 
-    # But in practice, the final text close merges with the same event. This is fine for "FlatXMLParser." 
-    # If a separate close was appended, we'd have 10 events. 
-    # So let's just confirm the text block is fully formed:
-    # If there's no separate close event for text, that's acceptable in some parser patterns.
-    # Or if there's a text close, it might be events[9]. We'll proceed with 9 total.
+    assert_text_close(all_events[9], text_id_2)
 
 def test_streaming_split_across_chunks(parser):
     """Test recognized tags split across multiple chunks."""
