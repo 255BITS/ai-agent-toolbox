@@ -1,6 +1,6 @@
 # Tool Response
 
-`ToolResponse` objects encapsulate the complete outcome of tool executions and contextual metadata.
+`ToolResponse` objects encapsulate the successful outcome of tool executions and contextual metadata.
 
 ## Structure
 
@@ -15,10 +15,18 @@ class ToolResponse:
 
 - **Unified Interface:** Access tool results and errors through standardized fields
 - **Context Preservation:** Maintains link to original tool call through `tool` property
-- **Error Resilience:** Captures exceptions without interrupting control flow
+- **Direct Exception Propagation:** Tool exceptions are not swallowed; they surface to the caller so you can decide how to respond.
 
 ## Example Usage
 ```python
-response = toolbox.use(event)
-print(f"{response.tool.name} result: {response.result}")
+try:
+    response = toolbox.use(event)
+except Exception as exc:
+    handle_tool_failure(exc)
+else:
+    print(f"{response.tool.name} result: {response.result}")
 ```
+
+## Error Handling
+
+`Toolbox.use()` and `Toolbox.use_async()` do not wrap tool exceptions. If a registered tool raises an error, the exception propagates to the caller and no `ToolResponse` is produced. Use standard Python error handling (e.g., `try`/`except`) around tool invocation when you need to intercept or recover from failures.
