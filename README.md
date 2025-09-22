@@ -32,6 +32,7 @@ pip install ai-agent-toolbox
 See our [examples folder](https://github.com/255BITS/ai-agent-toolbox/tree/main/examples) for:
 - Simple tool usage
 - Streaming integration
+- JSON tool parsing (complete and streaming payloads)
 - Read-write tools with feedback loops
 - Agent workflow examples
 
