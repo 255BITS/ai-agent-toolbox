@@ -5,7 +5,7 @@
 1. Create a Toolbox:
 ```python
 from ai_agent_toolbox import Toolbox, XMLParser, XMLPromptFormatter
-from examples.util import anthropic_llm_call
+from examples.util import anthropic_llm_call, anthropic_stream
 
 toolbox = Toolbox()
 parser = XMLParser()
@@ -55,15 +55,23 @@ for event in events:
 
 6. (optional) Use async streaming for calling tools ASAP:
 ```python
-# Stream the response
-async for chunk in anthropic_stream(system, prompt):
-    for event in parser.parse_chunk(chunk):
-        toolbox.use_async(event)
+import asyncio
 
-# Make sure to reset the parser and handle any unclosed tool tags
-events = parser.flush()
+async def main():
+    # Stream the response
+    async for chunk in anthropic_stream(system, prompt):
+        for event in parser.parse_chunk(chunk):
+            if event.is_tool_call:
+                await toolbox.use_async(event)
 
-# Optionally you can handle unclosed tool tags, or just ignore them
-for event in events:
-    toolbox.use_async(event)
+    # Make sure to reset the parser and handle any unclosed tool tags
+    events = parser.flush()
+
+    # Optionally you can handle unclosed tool tags, or just ignore them
+    for event in events:
+        if event.is_tool_call:
+            await toolbox.use_async(event)
+
+
+asyncio.run(main())
 ```
