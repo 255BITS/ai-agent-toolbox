@@ -4,6 +4,7 @@ from typing import List, Optional
 from .tool_parser import ToolParser, ToolParserState
 from ai_agent_toolbox.parsers import Parser
 from ai_agent_toolbox.parser_event import ParserEvent, ToolUse
+from ai_agent_toolbox.parsers.utils import longest_prefix_at_end
 
 class ParserState:
     OUTSIDE = "outside"
@@ -99,13 +100,12 @@ class XMLParser(Parser):
     def _partial_prefix(self, text: str, pattern: str) -> str:
         """
         Check if the end of 'text' is a prefix of 'pattern'.
-        E.g. if text ends with "<us" and pattern is "<use_tool>", 
+        E.g. if text ends with "<us" and pattern is "<use_tool>",
         we return "<us" to keep it in buffer as a partial match.
         """
-        max_len = min(len(text), len(pattern) - 1)
-        for size in range(max_len, 0, -1):
-            if pattern.startswith(text[-size:]):
-                return text[-size:]
+        prefix_len = longest_prefix_at_end(text, pattern)
+        if prefix_len:
+            return text[-prefix_len:]
         return ""
 
     def _stream_outside_text(self, text: str):

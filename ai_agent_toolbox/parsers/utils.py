@@ -50,3 +50,41 @@ def emit_text_block_events(text_buffer: MutableSequence[str]) -> List[ParserEven
         ),
         ParserEvent(type="text", mode="close", id=text_id, is_tool_call=False),
     ]
+
+
+def longest_prefix_at_end(buffer: str, full_str: str, *, allow_full_match: bool = False) -> int:
+    """Return the length of the longest suffix of ``buffer`` that matches a
+    prefix of ``full_str``.
+
+    This helper is used by streaming parsers to detect when an incoming chunk
+    ends with a *partial* sentinel (e.g., the start of a Markdown fence or XML
+    tag) so that the parser can retain the incomplete fragment for the next
+    chunk instead of emitting it as plain text.
+
+    Args:
+        buffer: The current accumulated text.
+        full_str: The string to match against (such as an opening/closing tag).
+        allow_full_match: Whether a complete match of ``full_str`` should be
+            reported. Parsers typically only care about partial matches, so the
+            default is ``False``.
+
+    Returns:
+        The length of the matching suffix/prefix overlap. ``0`` indicates that
+        no overlap was found.
+    """
+
+    if not full_str:
+        return 0
+
+    if allow_full_match:
+        max_len = min(len(buffer), len(full_str))
+    else:
+        max_len = min(len(buffer), max(len(full_str) - 1, 0))
+
+    if max_len <= 0:
+        return 0
+
+    for length in range(max_len, 0, -1):
+        if buffer.endswith(full_str[:length]):
+            return length
+    return 0
