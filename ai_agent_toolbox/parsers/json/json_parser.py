@@ -1,23 +1,12 @@
 import json
 import uuid
-from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
 
 from ai_agent_toolbox.parser_event import ParserEvent, ToolUse
 from ai_agent_toolbox.parsers.utils import TextEventStream
 from ai_agent_toolbox.parsers.parser import Parser
 
-
-@dataclass
-class ToolCallState:
-    """Tracks state for an in-flight JSON tool call."""
-
-    internal_id: str
-    name: Optional[str] = None
-    argument_buffer: str = ""
-    created: bool = False
-    closed: bool = False
-    keys: List[Tuple[str, Any]] = field(default_factory=list)
+from .tool_call_state import ToolCallState
 
 
 class JSONParser(Parser):
