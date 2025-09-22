@@ -79,6 +79,85 @@ for event in events:
     toolbox.use(event)
 ```
 
+### Structured arguments and validation
+
+Tool schemas can describe composite inputs (lists, dicts, enums) and enforce
+validation constraints. The toolbox automatically parses JSON strings emitted by
+models and applies optional custom parsers before validation.
+
+```python
+import json
+from dataclasses import dataclass
+
+from ai_agent_toolbox import Toolbox
+from ai_agent_toolbox.parser_event import ParserEvent, ToolUse
+
+
+@dataclass
+class Task:
+    title: str
+    estimate_hours: int
+
+
+def pick_next_task(tasks, metadata, priority, limit):
+    ranked = sorted(tasks, key=lambda task: task.estimate_hours)[:limit]
+    return {
+        "next_task": ranked[0].title,
+        "tasks_considered": [task.title for task in ranked],
+        "metadata": metadata,
+        "priority": priority,
+    }
+
+
+toolbox = Toolbox()
+toolbox.add_tool(
+    name="pick_next_task",
+    fn=pick_next_task,
+    args={
+        "tasks": {
+            "type": "list",
+            "parser": lambda payload: [Task(**task) for task in payload],
+        },
+        "metadata": {"type": "dict"},
+        "priority": {"type": "enum", "choices": ["low", "medium", "high"]},
+        "limit": {"type": "int", "min": 1, "max": 5},
+    },
+    description="Choose the next task to execute",
+)
+
+event = ParserEvent(
+    type="tool",
+    mode="close",
+    id="tasks-1",
+    tool=ToolUse(
+        name="pick_next_task",
+        args={
+            "tasks": json.dumps(
+                [
+                    {"title": "Write docs", "estimate_hours": 2},
+                    {"title": "Ship release", "estimate_hours": 1},
+                ]
+            ),
+            "metadata": json.dumps({"owner": "core-team"}),
+            "priority": "high",
+            "limit": "2",
+        },
+    ),
+    is_tool_call=True,
+)
+
+response = toolbox.use(event)
+print(response.result)
+# {
+#   'tasks': [Task(title='Write docs', estimate_hours=2), ...],
+#   'metadata': {'owner': 'core-team'},
+#   'priority': 'high',
+#   'limit': 2,
+#   'next_task': 'Ship release',
+#   'tasks_considered': ['Ship release', 'Write docs']
+# }
+```
+
 ### Asynchronous (Streaming)
 
 If you want to parse LLM responses as they come in:
