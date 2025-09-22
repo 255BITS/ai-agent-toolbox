@@ -1,6 +1,7 @@
 import uuid
 from ai_agent_toolbox.parser_event import ParserEvent, ToolUse
 from ai_agent_toolbox.parsers import Parser
+from ai_agent_toolbox.parsers.utils import emit_text_block_events
 
 class FlatXMLParser(Parser):
     """
@@ -284,42 +285,7 @@ class FlatXMLParser(Parser):
         """
         Closes out a block of outside text, emitting create/append/close if there's content.
         """
-        events = []
-        if not self._outside_text_buffer:
-            return events
-        full_text = "".join(self._outside_text_buffer)
-        if not full_text:
-            self._outside_text_buffer = []
-            return events
-
-        text_id = str(uuid.uuid4())
-        events.append(
-            ParserEvent(
-                type="text",
-                mode="create",
-                id=text_id,
-                is_tool_call=False
-            )
-        )
-        events.append(
-            ParserEvent(
-                type="text",
-                mode="append",
-                id=text_id,
-                content=full_text,
-                is_tool_call=False
-            )
-        )
-        events.append(
-            ParserEvent(
-                type="text",
-                mode="close",
-                id=text_id,
-                is_tool_call=False
-            )
-        )
-        self._outside_text_buffer = []
-        return events
+        return emit_text_block_events(self._outside_text_buffer)
 
     @staticmethod
     def _longest_tag_prefix_at_end(buf: str, tags) -> int:
