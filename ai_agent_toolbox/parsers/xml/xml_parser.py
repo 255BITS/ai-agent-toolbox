@@ -1,13 +1,10 @@
 from typing import List
 
 from .tool_parser import ToolParser, ToolParserState
+from .parser_state import ParserState
 from ai_agent_toolbox.parsers import Parser
 from ai_agent_toolbox.parser_event import ParserEvent, ToolUse
 from ai_agent_toolbox.parsers.utils import TextEventStream
-
-class ParserState:
-    OUTSIDE = "outside"
-    INSIDE_TOOL = "inside_tool"
 
 class XMLParser(Parser):
     """
