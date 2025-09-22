@@ -18,7 +18,7 @@ pip install ai-agent-toolbox
 For contributing or development:
 
 ```bash
-git clone https://github.com/yourusername/ai-agent-toolbox.git
+git clone https://github.com/255BITS/ai-agent-toolbox.git
 cd ai-agent-toolbox
 pip install -e ".[dev]"
 ```
