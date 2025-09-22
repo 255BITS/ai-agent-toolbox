@@ -1,6 +1,7 @@
 import uuid
 from ai_agent_toolbox.parsers.parser import Parser
 from ai_agent_toolbox.parser_event import ParserEvent, ToolUse
+from ai_agent_toolbox.parsers.utils import emit_text_block_events
 
 class MarkdownParser(Parser):
     """
@@ -230,32 +231,7 @@ class MarkdownParser(Parser):
         """
         If there is accumulated outside text, emit a full text block as create/append/close.
         """
-        events = []
-        if self.outside_text_buffer:
-            text = "".join(self.outside_text_buffer)
-            if text:
-                text_id = str(uuid.uuid4())
-                events.append(ParserEvent(
-                    type="text",
-                    mode="create",
-                    id=text_id,
-                    is_tool_call=False
-                ))
-                events.append(ParserEvent(
-                    type="text",
-                    mode="append",
-                    id=text_id,
-                    content=text,
-                    is_tool_call=False
-                ))
-                events.append(ParserEvent(
-                    type="text",
-                    mode="close",
-                    id=text_id,
-                    is_tool_call=False
-                ))
-            self.outside_text_buffer = []
-        return events
+        return emit_text_block_events(self.outside_text_buffer)
 
     @staticmethod
     def _longest_prefix_at_end(buf: str, full_str: str) -> int:
