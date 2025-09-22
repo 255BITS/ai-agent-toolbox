@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
 
 from ai_agent_toolbox.parser_event import ParserEvent, ToolUse
+from ai_agent_toolbox.parsers.utils import TextEventStream
 from ai_agent_toolbox.parsers.parser import Parser
 
 
@@ -25,7 +26,9 @@ class JSONParser(Parser):
     def __init__(self):
         self.buffer: str = ""
         self.events: List[ParserEvent] = []
-        self.current_text_id: Optional[str] = None
+        self.text_stream: TextEventStream = TextEventStream(
+            lambda event: self.events.append(event)
+        )
 
         # Tool call tracking
         self.tool_states: Dict[str, ToolCallState] = {}
@@ -53,16 +56,7 @@ class JSONParser(Parser):
             self._process_buffer(final=True)
             self.buffer = ""
 
-        if self.current_text_id is not None:
-            self.events.append(
-                ParserEvent(
-                    type="text",
-                    mode="close",
-                    id=self.current_text_id,
-                    is_tool_call=False,
-                )
-            )
-            self.current_text_id = None
+        self._close_text_block()
 
         for state in list(self.tool_states.values()):
             self._finalize_tool_state(state)
@@ -434,42 +428,10 @@ class JSONParser(Parser):
     # Text helpers
     # ------------------------------------------------------------------
     def _stream_text(self, text: str) -> None:
-        if not text:
-            return
-        self._open_text_block()
-        self.events.append(
-            ParserEvent(
-                type="text",
-                mode="append",
-                id=self.current_text_id,
-                is_tool_call=False,
-                content=text,
-            )
-        )
+        self.text_stream.stream(text)
 
     def _open_text_block(self) -> None:
-        if self.current_text_id is not None:
-            return
-        new_id = str(uuid.uuid4())
-        self.current_text_id = new_id
-        self.events.append(
-            ParserEvent(
-                type="text",
-                mode="create",
-                id=new_id,
-                is_tool_call=False,
-            )
-        )
+        self.text_stream.open()
 
     def _close_text_block(self) -> None:
-        if self.current_text_id is None:
-            return
-        self.events.append(
-            ParserEvent(
-                type="text",
-                mode="close",
-                id=self.current_text_id,
-                is_tool_call=False,
-            )
-        )
-        self.current_text_id = None
+        self.text_stream.close()

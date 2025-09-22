@@ -1,9 +1,9 @@
-import uuid
-from typing import List, Optional
+from typing import List
 
 from .tool_parser import ToolParser, ToolParserState
 from ai_agent_toolbox.parsers import Parser
 from ai_agent_toolbox.parser_event import ParserEvent, ToolUse
+from ai_agent_toolbox.parsers.utils import TextEventStream
 
 class ParserState:
     OUTSIDE = "outside"
@@ -19,8 +19,9 @@ class XMLParser(Parser):
     def __init__(self, tag="tool"):
         self.state = ParserState.OUTSIDE
         self.events: List[ParserEvent] = []
-
-        self.current_text_id: Optional[str] = None
+        self.text_stream: TextEventStream = TextEventStream(
+            lambda event: self.events.append(event)
+        )
         self.outside_buffer: str = ""
         self.tool_parser = ToolParser(tag=tag)
 
@@ -109,43 +110,13 @@ class XMLParser(Parser):
         return ""
 
     def _stream_outside_text(self, text: str):
-        if not text:
-            return
-        self._open_text_block()
-        self.events.append(
-            ParserEvent(
-                type="text",
-                is_tool_call=False,
-                mode="append",
-                id=self.current_text_id,
-                content=text
-            )
-        )
+        self.text_stream.stream(text)
 
     def _open_text_block(self):
-        if self.current_text_id is None:
-            new_id = str(uuid.uuid4())
-            self.current_text_id = new_id
-            self.events.append(
-                ParserEvent(
-                    type="text",
-                    is_tool_call=False,
-                    mode="create",
-                    id=new_id
-                )
-            )
+        self.text_stream.open()
 
     def _close_text_block(self):
-        if self.current_text_id:
-            self.events.append(
-                ParserEvent(
-                    type="text",
-                    is_tool_call=False,
-                    mode="close",
-                    id=self.current_text_id
-                )
-            )
-            self.current_text_id = None
+        self.text_stream.close()
 
     def flush(self) -> List[ParserEvent]:
         """
@@ -164,16 +135,7 @@ class XMLParser(Parser):
                 self.outside_buffer = ""
 
             # Close any open text block
-            if self.current_text_id is not None:
-                flush_events.append(
-                    ParserEvent(
-                        type="text",
-                        mode="close",
-                        is_tool_call=False,
-                        id=self.current_text_id
-                    )
-                )
-                self.current_text_id = None
+            self._close_text_block()
 
             # If we are in the middle of a tool parse
             if self.state == ParserState.INSIDE_TOOL:
@@ -192,16 +154,7 @@ class XMLParser(Parser):
                 # If leftover text remains after closing the tool, handle it
                 if leftover.strip():
                     self._handle_outside(leftover)
-                    if self.current_text_id is not None:
-                        flush_events.append(
-                            ParserEvent(
-                                type="text",
-                                mode="close",
-                                is_tool_call=False,
-                                id=self.current_text_id
-                            )
-                        )
-                        self.current_text_id = None
+                    self._close_text_block()
 
             return flush_events
         finally:
