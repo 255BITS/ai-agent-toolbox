@@ -159,52 +159,58 @@ class XMLParser(Parser):
         """
         flush_events: List[ParserEvent] = []
 
-        # If we are outside the tool and have leftover text
-        if self.state == ParserState.OUTSIDE and self.outside_buffer.strip():
-            self._stream_outside_text(self.outside_buffer)
-            self.outside_buffer = ""
+        previous_events = self.events
+        self.events = flush_events
 
-        # Close any open text block
-        if self.current_text_id is not None:
-            flush_events.append(
-                ParserEvent(
-                    type="text",
-                    mode="close",
-                    is_tool_call=False,
-                    id=self.current_text_id
-                )
-            )
-            self.current_text_id = None
+        try:
+            # If we are outside the tool and have leftover text
+            if self.state == ParserState.OUTSIDE and self.outside_buffer.strip():
+                self._stream_outside_text(self.outside_buffer)
+                self.outside_buffer = ""
 
-        # If we are in the middle of a tool parse
-        if self.state == ParserState.INSIDE_TOOL:
-            events, done, leftover = self.tool_parser.parse("")
-            flush_events.extend(events)
-            if not done:
-                # If no valid tool was created (i.e. no <name> found), discard the tool block
-                if not self.tool_parser.current_tool_id:
-                    # Open a new text block to resume normal parsing; do not emit any tool events.
-                    self._open_text_block()
-                else:
-                    self._finalize_tool_parser(flush_events)
-            self.tool_parser = ToolParser(tag=self.tag)
-            self.state = ParserState.OUTSIDE
-
-            # If leftover text remains after closing the tool, handle it
-            if leftover.strip():
-                self._handle_outside(leftover)
-                if self.current_text_id is not None:
-                    flush_events.append(
-                        ParserEvent(
-                            type="text",
-                            mode="close",
-                            is_tool_call=False,
-                            id=self.current_text_id
-                        )
+            # Close any open text block
+            if self.current_text_id is not None:
+                flush_events.append(
+                    ParserEvent(
+                        type="text",
+                        mode="close",
+                        is_tool_call=False,
+                        id=self.current_text_id
                     )
-                    self.current_text_id = None
+                )
+                self.current_text_id = None
 
-        return flush_events
+            # If we are in the middle of a tool parse
+            if self.state == ParserState.INSIDE_TOOL:
+                events, done, leftover = self.tool_parser.parse("")
+                flush_events.extend(events)
+                if not done:
+                    # If no valid tool was created (i.e. no <name> found), discard the tool block
+                    if not self.tool_parser.current_tool_id:
+                        # Open a new text block to resume normal parsing; do not emit any tool events.
+                        self._open_text_block()
+                    else:
+                        self._finalize_tool_parser(flush_events)
+                self.tool_parser = ToolParser(tag=self.tag)
+                self.state = ParserState.OUTSIDE
+
+                # If leftover text remains after closing the tool, handle it
+                if leftover.strip():
+                    self._handle_outside(leftover)
+                    if self.current_text_id is not None:
+                        flush_events.append(
+                            ParserEvent(
+                                type="text",
+                                mode="close",
+                                is_tool_call=False,
+                                id=self.current_text_id
+                            )
+                        )
+                        self.current_text_id = None
+
+            return flush_events
+        finally:
+            self.events = previous_events
 
     def _finalize_tool_parser(self, flush_events: List[ParserEvent]):
         # Force-close partial tool usage if it's not fully done

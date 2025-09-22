@@ -56,6 +56,7 @@ def xml_event_goldens():
             {"type": "text", "mode": "create", "id": "id0", "is_tool_call": False},
             {"type": "text", "mode": "append", "id": "id0", "is_tool_call": False, "content": "pre "},
             {"type": "text", "mode": "close", "id": "id0", "is_tool_call": False},
+            {"type": "text", "mode": "create", "id": "id1", "is_tool_call": False},
             {
                 "type": "text",
                 "mode": "append",
