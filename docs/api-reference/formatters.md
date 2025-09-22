@@ -6,18 +6,22 @@
 class XMLPromptFormatter:
     """
     Generates XML-structured prompts for tool documentation
-    
+
     Parameters:
         tag (str): Root XML tag (default: 'use_tool')
-    
+
     Methods:
         format_prompt(tools: Dict) -> str
             Create full prompt with XML tool descriptions
-            
+
         usage_prompt(toolbox: Toolbox) -> str
             Generate prompt section from registered tools
     """
 ```
+
+By instantiating `XMLPromptFormatter()` without arguments, the formatter will
+emit prompts that use the `<use_tool>` tag, matching the default for
+`XMLParser()`.
 
 ### Example Output
 

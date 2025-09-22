@@ -91,8 +91,8 @@ from examples.util import anthropic_stream
 async def main():
     # Initialize components
     toolbox = Toolbox()
-    parser = XMLParser(tag="tool")
-    formatter = XMLPromptFormatter(tag="tool")
+    parser = XMLParser(tag="use_tool")
+    formatter = XMLPromptFormatter(tag="use_tool")
     
     # Register tools (add your actual tools here)
     toolbox.add_tool(

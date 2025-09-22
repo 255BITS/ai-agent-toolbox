@@ -10,7 +10,7 @@ Note that this is not a strict XML parser. The parser is very open with what it 
 class XMLParser:
     """
     Streaming XML parser for structured tool invocations
-    
+
     Parameters:
         tag (str): Root XML tag to parse (default: 'use_tool')
     
@@ -26,11 +26,15 @@ class XMLParser:
     """
 ```
 
+Creating an `XMLParser()` without arguments configures it to look for
+`<use_tool>` blocks. Provide a different `tag` value to parse alternative
+wrappers.
+
 ### Example Input
 ```python
     from ai_agent_toolbox import XMLParser
-    parser = XMLParser(tag="tool")
-    events = parser.parse("Searching... <tool><name>search</name><query>AI news</query></tool>")
+    parser = XMLParser()
+    events = parser.parse("Searching... <use_tool><name>search</name><query>AI news</query></use_tool>")
 ```
 ### Example Output
 

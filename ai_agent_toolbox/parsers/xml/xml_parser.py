@@ -16,7 +16,7 @@ class XMLParser(Parser):
     chunks to our ToolParser until it signals completion or we run out of data.
     """
 
-    def __init__(self, tag="tool"):
+    def __init__(self, tag="use_tool"):
         self.state = ParserState.OUTSIDE
         self.events: List[ParserEvent] = []
 

@@ -4,9 +4,10 @@ from ai_agent_toolbox.formatters.prompt_formatter import PromptFormatter
 class XMLPromptFormatter(PromptFormatter):
     """
     Formats tool usage prompts in XML format, compatible with XMLParser.
-    Assumes the use of <tool>, <name>, <argName> XML tags.
+    Assumes the use of the provided root tag (defaults to <use_tool>) along with
+    <name> and argument tags.
     """
-    def __init__(self, tag="tool"):
+    def __init__(self, tag="use_tool"):
         self.tag = tag
 
     def format_prompt(self, tools: Dict[str, Dict[str, str]]) -> str:
