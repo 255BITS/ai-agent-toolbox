@@ -34,10 +34,6 @@ class JSONParser(Parser):
     # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------
-    def parse(self, text: str) -> List[ParserEvent]:
-        """Parse a complete JSON string and return all events."""
-        return self.parse_chunk(text) + self.flush()
-
     def parse_chunk(self, chunk: str) -> List[ParserEvent]:
         """Parse a chunk of JSON data (useful for streaming)."""
         if not chunk:

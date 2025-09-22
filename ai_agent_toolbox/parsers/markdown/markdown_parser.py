@@ -25,13 +25,6 @@ class MarkdownParser(Parser):
         self.current_tool_name = None  # from language identifier; default "code"
         self.tool_content_buffer = []
 
-    def parse(self, text: str):
-        """Convenience method for one-shot parsing."""
-        events = []
-        events.extend(self.parse_chunk(text))
-        events.extend(self.flush())
-        return events
-
     def parse_chunk(self, chunk: str):
         """Process an incoming chunk of text and emit ParserEvent objects."""
         events = []
