@@ -1,6 +1,7 @@
 import uuid
-from ai_agent_toolbox.parsers.parser import Parser
 from ai_agent_toolbox.parser_event import ParserEvent, ToolUse
+from ai_agent_toolbox.parsers.parser import Parser
+from ai_agent_toolbox.parsers.utils import longest_prefix_at_end
 
 class MarkdownParser(Parser):
     """
@@ -97,7 +98,7 @@ class MarkdownParser(Parser):
         if idx == -1:
             # No complete opening fence found. Check if the end of the buffer
             # is a partial fence.
-            partial_len = self._longest_prefix_at_end(self.buffer, self.OPEN_FENCE)
+            partial_len = longest_prefix_at_end(self.buffer, self.OPEN_FENCE)
             if partial_len:
                 if len(self.buffer) > partial_len:
                     self.outside_text_buffer.append(self.buffer[:-partial_len])
@@ -167,7 +168,7 @@ class MarkdownParser(Parser):
         idx = self._find_closing_fence_index(self.buffer)
         if idx == -1:
             # No valid closing fence found.
-            partial_len = self._longest_prefix_at_end(self.buffer, self.CLOSE_FENCE)
+            partial_len = longest_prefix_at_end(self.buffer, self.CLOSE_FENCE)
             if partial_len:
                 if len(self.buffer) > partial_len:
                     content = self.buffer[:-partial_len]
@@ -257,14 +258,3 @@ class MarkdownParser(Parser):
             self.outside_text_buffer = []
         return events
 
-    @staticmethod
-    def _longest_prefix_at_end(buf: str, full_str: str) -> int:
-        """
-        Determines if the end of `buf` is a prefix of `full_str`. This is used
-        to preserve partial code fences across chunks.
-        """
-        max_len = min(len(buf), len(full_str) - 1)
-        for length in range(max_len, 0, -1):
-            if buf.endswith(full_str[:length]):
-                return length
-        return 0

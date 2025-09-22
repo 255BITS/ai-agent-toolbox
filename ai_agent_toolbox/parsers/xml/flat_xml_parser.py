@@ -1,6 +1,7 @@
 import uuid
 from ai_agent_toolbox.parser_event import ParserEvent, ToolUse
 from ai_agent_toolbox.parsers import Parser
+from ai_agent_toolbox.parsers.utils import longest_prefix_at_end
 
 class FlatXMLParser(Parser):
     """
@@ -209,7 +210,7 @@ class FlatXMLParser(Parser):
         close_idx = self._buffer.find(close_tag)
         if close_idx == -1:
             # Possibly partial close tag or no close tag yet
-            partial_len = self._longest_prefix_at_end(self._buffer, close_tag)
+            partial_len = longest_prefix_at_end(self._buffer, close_tag)
             if partial_len == 0:
                 # No partial prefix, so the entire buffer is content
                 if self._buffer:
@@ -332,22 +333,8 @@ class FlatXMLParser(Parser):
         longest = 0
         for t in tags:
             open_tag = f"<{t}>"
-            prefix_len = FlatXMLParser._longest_prefix_at_end(buf, open_tag)
+            prefix_len = longest_prefix_at_end(buf, open_tag)
             if prefix_len > longest:
                 longest = prefix_len
         return longest
 
-    @staticmethod
-    def _longest_prefix_at_end(buf: str, full_str: str) -> int:
-        """
-        If the end of `buf` matches a prefix of `full_str` of length L,
-        return L. Otherwise 0. E.g. if buf ends with "<thi" and full_str is "<think>",
-        return 4.
-        """
-        max_len = min(len(buf), len(full_str) - 1)
-        # We never consider a full match as "partial prefix"—that’s an actual find.
-        # So we only check up to len(full_str) - 1
-        for length in range(max_len, 0, -1):
-            if buf.endswith(full_str[:length]):
-                return length
-        return 0
