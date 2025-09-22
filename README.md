@@ -51,8 +51,10 @@ parser = XMLParser(tag="use_tool")
 formatter = XMLPromptFormatter(tag="use_tool")
 
 # Add tools to your toolbox
-def thinking(thoughts=""):
-    print("I'm thinking:", thoughts)
+def thinking(thoughts: str, tone: str = "curious"):
+    message = f"I'm thinking ({tone}): {thoughts}"
+    print(message)
+    return message
 
 toolbox.add_tool(
     name="thinking",
@@ -60,7 +62,14 @@ toolbox.add_tool(
     args={
         "thoughts": {
             "type": "string",
-            "description": "Anything you want to think about"
+            "description": "Anything you want to think about",
+            "required": True,
+        },
+        "tone": {
+            "type": "string",
+            "description": "Optional vibe for the thoughts",
+            "required": False,
+            "default": "curious",
         }
     },
     description="For thinking out loud"
@@ -76,7 +85,11 @@ response = anthropic_llm_call(system_prompt=system, prompt=prompt)
 events = parser.parse(response)
 
 for event in events:
-    toolbox.use(event)
+    response = toolbox.use(event)
+    if response and response.error:
+        print("Tool validation error:", response.error)
+    elif response:
+        print(f"{response.tool.name} result:", response.result)
 ```
 
 ### Asynchronous (Streaming)
@@ -97,8 +110,11 @@ async def main():
     # Register tools (add your actual tools here)
     toolbox.add_tool(
         name="search",
-        fn=lambda query: f"Results for {query}",
-        args={"query": {"type": "string"}},
+        fn=lambda query, max_results=5: f"Results for {query} (top {max_results})",
+        args={
+            "query": {"type": "string"},
+            "max_results": {"type": "int", "required": False, "default": "5"},
+        },
         description="Web search tool"
     )
     # Set up the system and user prompt
@@ -114,13 +130,17 @@ async def main():
         for event in parser.parse_chunk(chunk):
             if event.is_tool_call:
                 print(f"Executing tool: {event.tool.name}")
-                await toolbox.use_async(event)  # Handle async tools
+                response = await toolbox.use_async(event)  # Handle async tools
+                if response and response.error:
+                    print("Tool validation error:", response.error)
 
     # Call this at the end of output to handle any unclosed or invalid LLM outputs
     for event in parser.flush():
         if event.is_tool_call:
             print(f"Executing tool: {event.tool.name}")
-            await toolbox.use_async(event)  # Handle async tools
+            response = await toolbox.use_async(event)  # Handle async tools
+            if response and response.error:
+                print("Tool validation error:", response.error)
 
 if __name__ == "__main__":
     asyncio.run(main())

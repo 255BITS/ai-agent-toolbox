@@ -18,14 +18,16 @@ class Toolbox:
     """
 ```
 
-### Types
+### Argument schema
 
-When adding a tool, `args` can have any of the following type:
+Each entry in the `args` dictionary describes one argument the tool accepts. The schema supports:
 
-* "int" - integer value
-* "float" - floating point value
-* "bool" - boolean(true or false)
-* "string" - text
+* `type` – coercion target (`"int"`, `"float"`, `"bool"`, `"string"`). Defaults to `"string"`.
+* `description` – human readable docs for prompt templates.
+* `required` – whether the model must supply the argument. Defaults to `True`.
+* `default` – value used when the argument is omitted and `required` is `False`. Defaults are type-converted with the same rules as user input.
+
+Missing required values and invalid conversions are surfaced as structured validation errors instead of printing to stdout.
 
 ### Example Registration
 
@@ -39,7 +41,12 @@ toolbox.add_tool(
     fn=image_generate,
     args={
         "prompt": {"type": "string", "description": "Image description"},
-        "style": {"type": "string", "description": "realistic or cartoon"}
+        "style": {
+            "type": "string",
+            "description": "realistic or cartoon",
+            "required": False,
+            "default": "realistic",
+        }
     },
     description="Text-to-image generation tool"
 )
@@ -52,10 +59,20 @@ events = parser.parse(llm_response)
 for event in events:
     if event.is_tool_call:
         response = toolbox.use(event)
+        if response and response.error:
+            print("Validation failed:", response.error)
+            continue
         if response:
             print(f"""
 Tool used: {response.tool.name}
 Arguments: {response.tool.args}
 Result: {response.result}
 """)
+
+# Example validation error payload when a required arg is missing
+# {
+#     "type": "validation_error",
+#     "message": "Argument validation failed.",
+#     "errors": [{"field": "prompt", "type": "missing", ...}]
+# }
 ```

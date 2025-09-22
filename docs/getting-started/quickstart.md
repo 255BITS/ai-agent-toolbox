@@ -14,8 +14,10 @@ formatter = XMLPromptFormatter()
 
 2. Define and Add Tools:
 ```python
-def thinking(thoughts=""):
-    print(f"Thinking: {thoughts}")
+def thinking(thoughts: str, tone: str = "curious"):
+    message = f"Thinking ({tone}): {thoughts}"
+    print(message)
+    return message
 
 toolbox.add_tool(
     name="thinking",
@@ -23,8 +25,15 @@ toolbox.add_tool(
     args={
         "thoughts": {
             "type": "string",
-            "description": "Thoughts to process"
-        }
+            "description": "Thoughts to process",
+            "required": True,
+        },
+        "tone": {
+            "type": "string",
+            "description": "Optional vibe for the thought",
+            "required": False,
+            "default": "curious",
+        },
     },
     description="For thinking out loud"
 )
@@ -50,7 +59,11 @@ response = anthropic_llm_call(
 events = parser.parse(response)
 
 for event in events:
-    toolbox.use(event)
+    response = toolbox.use(event)
+    if response and response.error:
+        print("Tool validation error:", response.error)
+    elif response:
+        print(f"{response.tool.name} result:", response.result)
 ```
 
 6. (optional) Use async streaming for calling tools ASAP:
