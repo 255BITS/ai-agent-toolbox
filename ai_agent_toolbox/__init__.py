@@ -8,11 +8,13 @@ from .formatters.xml.flat_xml_prompt_formatter import FlatXMLPromptFormatter
 from .formatters.markdown.markdown_prompt_formatter import MarkdownPromptFormatter
 from .formatters.json.json_prompt_formatter import JSONPromptFormatter
 from .parser_event import ParserEvent
+from .tool_use import ToolUse
 from .tool_response import ToolResponse
 
 __all__ = [
     "Toolbox",
     "ParserEvent",
+    "ToolUse",
     "ToolResponse",
     "XMLParser",
     "FlatXMLParser",

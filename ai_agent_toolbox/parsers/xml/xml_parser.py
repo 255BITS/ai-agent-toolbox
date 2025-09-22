@@ -2,7 +2,8 @@ from typing import List
 
 from .tool_parser import ToolParser, ToolParserState
 from ai_agent_toolbox.parsers import Parser
-from ai_agent_toolbox.parser_event import ParserEvent, ToolUse
+from ai_agent_toolbox.parser_event import ParserEvent
+from ai_agent_toolbox.tool_use import ToolUse
 from ai_agent_toolbox.parsers.utils import TextEventStream
 
 class ParserState:

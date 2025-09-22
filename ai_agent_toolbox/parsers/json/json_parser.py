@@ -2,7 +2,8 @@ import json
 import uuid
 from typing import Any, Dict, List, Optional, Tuple
 
-from ai_agent_toolbox.parser_event import ParserEvent, ToolUse
+from ai_agent_toolbox.parser_event import ParserEvent
+from ai_agent_toolbox.tool_use import ToolUse
 from ai_agent_toolbox.parsers.utils import TextEventStream
 from ai_agent_toolbox.parsers.parser import Parser
 

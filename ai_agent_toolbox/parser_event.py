@@ -1,10 +1,7 @@
-from dataclasses import dataclass, field
-from typing import Optional, Any, Dict
+from dataclasses import dataclass
+from typing import Optional
 
-@dataclass
-class ToolUse:
-    name: str
-    args: Dict[str, Any] = field(default_factory=dict)
+from .tool_use import ToolUse
 
 @dataclass
 class ParserEvent:

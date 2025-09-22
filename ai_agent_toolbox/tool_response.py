@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import Any, Optional
-from .parser_event import ToolUse
+from .tool_use import ToolUse
 
 @dataclass
 class ToolResponse:

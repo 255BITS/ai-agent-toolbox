@@ -1,6 +1,7 @@
 import pytest
 from ai_agent_toolbox.parsers.markdown.markdown_parser import MarkdownParser
-from ai_agent_toolbox.parser_event import ParserEvent, ToolUse
+from ai_agent_toolbox.parser_event import ParserEvent
+from ai_agent_toolbox.tool_use import ToolUse
 
 # --- Assertion Helpers ---
 

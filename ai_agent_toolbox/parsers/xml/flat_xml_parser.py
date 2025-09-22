@@ -1,5 +1,6 @@
 import uuid
-from ai_agent_toolbox.parser_event import ParserEvent, ToolUse
+from ai_agent_toolbox.parser_event import ParserEvent
+from ai_agent_toolbox.tool_use import ToolUse
 from ai_agent_toolbox.parsers import Parser
 from ai_agent_toolbox.parsers.utils import emit_text_block_events
 
