@@ -51,6 +51,23 @@ for event in events:
 
 There are many more examples in the `examples` folder, viewable on github - [link](https://github.com/255BITS/ai-agent-toolbox/tree/main/examples).
 
+### JSON Based Tool Calls
+
+```python
+from ai_agent_toolbox import Toolbox, JSONParser, JSONPromptFormatter
+
+toolbox = Toolbox()
+parser = JSONParser()
+formatter = JSONPromptFormatter()
+
+system = "Respond with JSON tool calls when you need to act.\n"
+system += formatter.usage_prompt(toolbox)
+
+payload = llm_response_as_json(...)
+for event in parser.parse(payload):
+    toolbox.use(event)
+```
+
 ## Getting Started
 
 Check out our [Quick Start Guide](getting-started/quickstart.md) to begin using AI Agent Toolbox.

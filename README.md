@@ -13,7 +13,7 @@ AI Agent Toolbox is meant to be stable, reliable, and easy to master.
 * Model provider-agnostic - supports Anthropic, OpenAI, Groq, NEAR AI, Ollama, Hyperbolic, NanoGPT, and more
 * Framework compatible - usable in anthropic-sdk-python, openai-python, ell, LangChain, etc
 * Supports protocols such as Anthropic Model Context Protocol(MCP)
-* Robust parsing
+* Robust parsing (XML, JSON, Markdown)
 * Streaming support
 * Support for read-write tools (feedback) as well as write-only tools
 
@@ -124,6 +124,45 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+```
+
+
+### JSON Tool Calls
+
+Many providers (OpenAI, Anthropic, Groq, etc.) stream tool usage as JSON objects. The toolbox ships with a matching parser and
+prompt formatter so you can keep the same agent loop regardless of provider.
+
+```python
+from ai_agent_toolbox import Toolbox, JSONParser, JSONPromptFormatter
+
+toolbox = Toolbox()
+parser = JSONParser()
+formatter = JSONPromptFormatter()
+
+toolbox.add_tool(
+    name="search",
+    fn=lambda query: f"Results for {query}",
+    args={"query": {"type": "string", "description": "Search keywords"}},
+    description="Web search tool",
+)
+
+system = "You are a JSON-native assistant.\n"
+system += formatter.usage_prompt(toolbox)
+
+# One-shot JSON payloads
+response_payload = provider_call(...)
+for event in parser.parse(response_payload):
+    if event.is_tool_call:
+        toolbox.use(event)
+
+# Streaming Server Sent Events (SSE)
+for chunk in provider_stream(...):
+    for event in parser.parse_chunk(chunk):
+        if event.is_tool_call:
+            toolbox.use(event)
+for event in parser.flush():
+    if event.is_tool_call:
+        toolbox.use(event)
 ```
 
 
