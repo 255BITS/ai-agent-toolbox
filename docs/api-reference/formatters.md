@@ -80,3 +80,20 @@ class FlatXMLPromptFormatter(PromptFormatter):
         usage_prompt(toolbox: Toolbox) -> str
             Generates the XML usage prompt based on the tools registered in a Toolbox.
     """
+```
+
+## JSONPromptFormatter
+
+```python
+class JSONPromptFormatter(PromptFormatter):
+    """
+    Formats tool usage prompts in JSON format with function-call examples.
+
+    Methods:
+        format_prompt(tools: Dict[str, Dict[str, Any]]) -> str
+            Render human readable documentation plus JSON snippets for each tool.
+
+        usage_prompt(toolbox: Toolbox) -> str
+            Convenience helper to format the current toolbox registry.
+    """
+```

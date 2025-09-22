@@ -26,6 +26,34 @@ class XMLParser:
     """
 ```
 
+## JSONParser
+
+```python
+class JSONParser:
+    """
+    Streaming parser for JSON tool calls as produced by OpenAI, Anthropic, Groq, etc.
+
+    Methods:
+        parse(text: str) -> List[ParserEvent]
+            Parse a complete JSON payload.
+
+        parse_chunk(chunk: str) -> List[ParserEvent]
+            Feed streaming JSON or SSE chunks incrementally.
+
+        flush() -> List[ParserEvent]
+            Finalize parsing, closing open tool calls and text blocks.
+    """
+```
+
+### Example Usage
+
+```python
+from ai_agent_toolbox import JSONParser
+
+parser = JSONParser()
+events = parser.parse('{"type": "tool_call", "function": {"name": "search", "arguments": {"query": "AI"}}}')
+```
+
 ### Example Input
 ```python
     from ai_agent_toolbox import XMLParser
