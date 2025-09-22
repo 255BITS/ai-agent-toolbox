@@ -30,7 +30,6 @@ When adding a tool, `args` can have any of the following type:
 ### Example Registration
 
 ```python
-```python
 def image_generate(prompt: str, style: str = "realistic"):
     """Generate image from text prompt"""
     pass
