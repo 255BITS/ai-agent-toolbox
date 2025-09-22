@@ -1,17 +1,14 @@
 import pytest
 from ai_agent_toolbox import XMLParser
-from pprint import pprint
 
 @pytest.fixture
 def parser():
     return XMLParser(tag="use_tool")
 
-def assert_text_create(event, expected_id_pattern=None):
+def assert_text_create(event):
     assert event.type == "text"
     assert event.mode == "create"
     assert event.id is not None
-    if expected_id_pattern:
-        assert re.match(expected_id_pattern, event.id)
 
 def assert_text_append(event, text_id, content):
     assert event.type == "text"
@@ -267,7 +264,6 @@ def test_complex_nested_content(parser):
     assert events[2].mode == "append"
     
     # Tool closure
-    pprint(events)
     assert_tool_close(events[3], tool_id)
 
 def test_invalid_tool_argument(parser):
