@@ -50,5 +50,3 @@ class JSONPromptFormatter(PromptFormatter):
 
         return "\n".join(lines).strip()
 
-    def usage_prompt(self, toolbox) -> str:
-        return self.format_prompt(toolbox._tools)

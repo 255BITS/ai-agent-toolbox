@@ -31,8 +31,3 @@ class FlatXMLPromptFormatter(PromptFormatter):
 
         return "\n".join(lines)
 
-    def usage_prompt(self, toolbox) -> str:
-        """
-        Generates a prompt explaining tool usage and argument schemas from a Toolbox.
-        """
-        return self.format_prompt(toolbox._tools)

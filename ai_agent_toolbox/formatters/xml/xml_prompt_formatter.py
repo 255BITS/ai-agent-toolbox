@@ -43,9 +43,3 @@ class XMLPromptFormatter(PromptFormatter):
 
         return "\n".join(lines)
 
-    def usage_prompt(self, toolbox) -> str:
-        """
-        Generates a prompt explaining tool usage and argument schemas from a Toolbox.
-        """
-        base_prompt = self.format_prompt(toolbox._tools)
-        return base_prompt
