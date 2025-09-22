@@ -273,6 +273,19 @@ next_response = llm_call(
 
 ```
 
+## Running Tests
+
+Streaming parsers in this project are validated against golden event traces so
+refactors keep their streaming semantics intact. Before opening a pull request,
+run the parser regression suite:
+
+```bash
+pytest tests/test_xml_parser.py tests/test_markdown_parser.py tests/test_flat_xml_parser.py
+```
+
+You can also execute the entire test suite with `pytest tests` to include any
+additional checks.
+
 ## Benefits
 
 | Feature/Capability          | AI Agent Toolbox ✅ | Naive Regex ❌ | Standard XML Parsers ❌ |
