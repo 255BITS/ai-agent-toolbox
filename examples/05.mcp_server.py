@@ -1,12 +1,16 @@
-#!/usr/bin/env python
-# Run the 05.mcp_client.py to test this
+"""Minimal MCP server used by :mod:`examples.05.mcp_client`."""
+
 from mcp.server.fastmcp import FastMCP
 
 mcp = FastMCP("Addition Server")
 
+
 @mcp.tool()
 def add(a: int, b: int) -> int:
-    """Add two numbers"""
+    """Add two numbers."""
+
     return a + b
 
-mcp.run()
+
+if __name__ == "__main__":
+    mcp.run()
