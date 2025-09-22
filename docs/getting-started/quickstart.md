@@ -5,6 +5,7 @@
 1. Create a Toolbox:
 ```python
 from ai_agent_toolbox import Toolbox, XMLParser, XMLPromptFormatter
+from examples.util import anthropic_llm_call
 
 toolbox = Toolbox()
 parser = XMLParser()
@@ -36,7 +37,15 @@ system += formatter.usage_prompt(toolbox) # Add the instructions to use the tool
 prompt = "Think about something"
 ```
 
-4. Parse the response:
+4. Generate a response from your LLM:
+```python
+response = anthropic_llm_call(
+    prompt=prompt,
+    system_prompt=system,
+)
+```
+
+5. Parse the response:
 ```python
 events = parser.parse(response)
 
@@ -44,7 +53,7 @@ for event in events:
     toolbox.use(event)
 ```
 
-5. (optional) Use async streaming for calling tools ASAP:
+6. (optional) Use async streaming for calling tools ASAP:
 ```python
 # Stream the response
 async for chunk in anthropic_stream(system, prompt):
