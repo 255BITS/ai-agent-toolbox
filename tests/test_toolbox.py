@@ -1,5 +1,7 @@
-import pytest
+import json
 from unittest.mock import Mock
+
+import pytest
 
 from ai_agent_toolbox.toolbox import Toolbox, ToolConflictError
 from ai_agent_toolbox.parser_event import ParserEvent, ToolUse
@@ -131,3 +133,146 @@ def test_type_conversion():
         "float_arg": 3.14,
         "bool_arg": True
     }
+
+
+def test_composite_type_conversion():
+    toolbox = Toolbox()
+    toolbox.add_tool(
+        name="composite",
+        fn=lambda **kwargs: kwargs,
+        args={
+            "items": {"type": "list"},
+            "config": {"type": "dict"},
+            "mode": {"type": "enum", "choices": ["fast", "slow"]},
+        },
+    )
+
+    event = ParserEvent(
+        type="tool",
+        mode="close",
+        id="test-id",
+        tool=ToolUse(
+            name="composite",
+            args={
+                "items": "[1, 2, 3]",
+                "config": '{"threshold": 0.7}',
+                "mode": "fast",
+            },
+        ),
+        is_tool_call=True,
+    )
+
+    response = toolbox.use(event)
+    assert response.result == {
+        "items": [1, 2, 3],
+        "config": {"threshold": 0.7},
+        "mode": "fast",
+    }
+
+
+def test_invalid_json_for_list_raises_error():
+    toolbox = Toolbox()
+    toolbox.add_tool(
+        name="broken",
+        fn=lambda **kwargs: kwargs,
+        args={"items": {"type": "list"}},
+    )
+
+    event = ParserEvent(
+        type="tool",
+        mode="close",
+        id="test-id",
+        tool=ToolUse(name="broken", args={"items": "not-json"}),
+        is_tool_call=True,
+    )
+
+    with pytest.raises(ValueError):
+        toolbox.use(event)
+
+
+def test_schema_validation_enforced():
+    toolbox = Toolbox()
+    toolbox.add_tool(
+        name="validator",
+        fn=lambda **kwargs: kwargs,
+        args={
+            "count": {"type": "int", "min": 1, "max": 3},
+            "mode": {"type": "enum", "choices": ["fast", "slow"]},
+        },
+    )
+
+    invalid_min = ParserEvent(
+        type="tool",
+        mode="close",
+        id="test-id",
+        tool=ToolUse(name="validator", args={"count": "0", "mode": "fast"}),
+        is_tool_call=True,
+    )
+
+    with pytest.raises(ValueError, match="less than minimum"):
+        toolbox.use(invalid_min)
+
+    invalid_max = ParserEvent(
+        type="tool",
+        mode="close",
+        id="test-id",
+        tool=ToolUse(name="validator", args={"count": "5", "mode": "fast"}),
+        is_tool_call=True,
+    )
+
+    with pytest.raises(ValueError, match="exceeds maximum"):
+        toolbox.use(invalid_max)
+
+    invalid_choice = ParserEvent(
+        type="tool",
+        mode="close",
+        id="test-id",
+        tool=ToolUse(name="validator", args={"count": "2", "mode": "medium"}),
+        is_tool_call=True,
+    )
+
+    with pytest.raises(ValueError, match="allowed choices"):
+        toolbox.use(invalid_choice)
+
+
+def test_custom_parser_invoked():
+    parser = Mock(side_effect=lambda payload: {item["key"]: item["value"] for item in payload})
+
+    toolbox = Toolbox()
+    toolbox.add_tool(
+        name="custom",
+        fn=lambda **kwargs: kwargs,
+        args={
+            "payload": {
+                "type": "list",
+                "parser": parser,
+                "choices": [
+                    {"a": 1, "b": 2}
+                ],
+            }
+        },
+    )
+
+    event = ParserEvent(
+        type="tool",
+        mode="close",
+        id="test-id",
+        tool=ToolUse(
+            name="custom",
+            args={
+                "payload": json.dumps([
+                    {"key": "a", "value": 1},
+                    {"key": "b", "value": 2},
+                ])
+            },
+        ),
+        is_tool_call=True,
+    )
+
+    response = toolbox.use(event)
+    parser.assert_called_once()
+    assert parser.call_args[0][0] == [
+        {"key": "a", "value": 1},
+        {"key": "b", "value": 2},
+    ]
+    assert response.result == {"payload": {"a": 1, "b": 2}}
