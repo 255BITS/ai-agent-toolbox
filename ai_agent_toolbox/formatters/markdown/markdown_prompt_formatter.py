@@ -29,8 +29,3 @@ class MarkdownPromptFormatter(PromptFormatter):
             lines.append(f"{self.fence}")
         return "\n".join(lines)
 
-    def usage_prompt(self, toolbox) -> str:
-        """
-        Generates a usage prompt from a Toolbox instance.
-        """
-        return self.format_prompt(toolbox._tools)
