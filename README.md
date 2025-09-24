@@ -282,7 +282,7 @@ refactors keep their streaming semantics intact. Before opening a pull request,
 run the parser regression suite:
 
 ```bash
-pytest tests/test_xml_parser.py tests/test_markdown_parser.py tests/test_flat_xml_parser.py
+pytest tests/**/*.py
 ```
 
 You can also execute the entire test suite with `pytest tests` to include any
