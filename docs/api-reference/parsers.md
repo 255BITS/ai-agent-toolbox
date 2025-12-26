@@ -26,34 +26,6 @@ class XMLParser:
     """
 ```
 
-## JSONParser
-
-```python
-class JSONParser:
-    """
-    Streaming parser for JSON tool calls as produced by OpenAI, Anthropic, Groq, etc.
-
-    Methods:
-        parse(text: str) -> List[ParserEvent]
-            Parse a complete JSON payload.
-
-        parse_chunk(chunk: str) -> List[ParserEvent]
-            Feed streaming JSON or SSE chunks incrementally.
-
-        flush() -> List[ParserEvent]
-            Finalize parsing, closing open tool calls and text blocks.
-    """
-```
-
-### Example Usage
-
-```python
-from ai_agent_toolbox import JSONParser
-
-parser = JSONParser()
-events = parser.parse('{"type": "tool_call", "function": {"name": "search", "arguments": {"query": "AI"}}}')
-```
-
 ### Example Input
 ```python
     from ai_agent_toolbox import XMLParser
@@ -104,32 +76,6 @@ events = parser.parse("<search>AI news</search>")
     ParserEvent(type='tool', mode='close', id='8b62426a-9bca-40e0-a9da-b2a57c6e3ba3', tool=ToolUse(name='search', args={'content': 'AI news'}), is_tool_call=True, content='AI news')
 ]
 ```
-
-## MarkdownParser
-
-The `MarkdownParser` is a streaming parser for Markdown code fences that treats code blocks as tool calls.
-It supports code fences with an optional language identifier (e.g. ```python) and treats all text outside
-the code fences as plain text.
-
-### Methods
-
-* `parse(text: str) -> List[ParserEvent]`: Parses the complete Markdown text.
-* `parse_chunk(chunk: str) -> List[ParserEvent]`: Processes a chunk of Markdown text in streaming scenarios.
-* `flush() -> List[ParserEvent]`: Finalizes parsing by forcing the closure of any open code fence.
-
-### Example Usage
-
-```python
-from ai_agent_toolbox.parsers.markdown.markdown_parser import MarkdownParser
-
-parser = MarkdownParser()
-markdown_text = "Hello world.\n```python\nprint('Hi')\n```"
-events = parser.parse(markdown_text)
-for event in events:
-    print(event)
-```
-
-The parser emits `ParserEvent` objects with `type` set to `"text"` for regular content and `"tool"` for code blocks.
 
 ## ParserEvent
 
