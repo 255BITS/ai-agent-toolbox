@@ -13,7 +13,7 @@ AI Agent Toolbox is meant to be stable, reliable, and easy to master.
 * Model provider-agnostic - supports Anthropic, OpenAI, Groq, NEAR AI, Ollama, Hyperbolic, NanoGPT, and more
 * Framework compatible - usable in anthropic-sdk-python, openai-python, ell, LangChain, etc
 * Supports protocols such as Anthropic Model Context Protocol(MCP)
-* Robust parsing (XML, JSON, Markdown)
+* Robust XML parsing
 * Streaming support
 * Support for read-write tools (feedback) as well as write-only tools
 
@@ -32,7 +32,6 @@ pip install ai-agent-toolbox
 See our [examples folder](https://github.com/255BITS/ai-agent-toolbox/tree/main/examples) for:
 - Simple tool usage
 - Streaming integration
-- JSON tool parsing (complete and streaming payloads)
 - Read-write tools with feedback loops
 - Agent workflow examples
 
@@ -208,46 +207,6 @@ if __name__ == "__main__":
 ```
 
 
-### JSON Tool Calls
-
-Many providers (OpenAI, Anthropic, Groq, etc.) stream tool usage as JSON objects. The toolbox ships with a matching parser and
-prompt formatter so you can keep the same agent loop regardless of provider.
-
-```python
-from ai_agent_toolbox import Toolbox, JSONParser, JSONPromptFormatter
-
-toolbox = Toolbox()
-parser = JSONParser()
-formatter = JSONPromptFormatter()
-
-toolbox.add_tool(
-    name="search",
-    fn=lambda query: f"Results for {query}",
-    args={"query": {"type": "string", "description": "Search keywords"}},
-    description="Web search tool",
-)
-
-system = "You are a JSON-native assistant.\n"
-system += formatter.usage_prompt(toolbox)
-
-# One-shot JSON payloads
-response_payload = provider_call(...)
-for event in parser.parse(response_payload):
-    if event.is_tool_call:
-        toolbox.use(event)
-
-# Streaming Server Sent Events (SSE)
-for chunk in provider_stream(...):
-    for event in parser.parse_chunk(chunk):
-        if event.is_tool_call:
-            toolbox.use(event)
-for event in parser.flush():
-    if event.is_tool_call:
-        toolbox.use(event)
-```
-
-
-
 ### Local Tooling
 
 This supports other providers and open source models. Here you parse the results yourself.
@@ -294,7 +253,7 @@ additional checks.
 |-----------------------------|---------------------|----------------|-------------------------|
 | **Streaming Support**        | ✅ Chunk-by-chunk processing | ❌ Full text required | ❌ DOM-based requires full document |
 | **Nested HTML/React**        | ✅ Handles JSX-like fragments | ❌ Fails on nesting | ❌ Requires strict hierarchy |
-| **Flexible Tool Format**     | ✅ Supports multiple tool use formats | ❌ Brittle pattern matching | ❌ Requires schema validation |
+| **Flexible Tool Format**     | ✅ XML tool format with streaming | ❌ Brittle pattern matching | ❌ Requires schema validation |
 | **Automatic Type Conversion**| ✅ String→int/float/bool | ❌ Manual casting needed | ❌ Returns only strings |
 | **Error Recovery**           | ✅ Heals partial/malformed tags | ❌ Fails on first mismatch | ❌ Aborts on validation errors |
 | **Battle Tested**            | ✅ Heavily tested | ❌ Ad-hoc testing | ❌ Generic XML cases only |
