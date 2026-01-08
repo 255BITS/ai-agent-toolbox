@@ -1,11 +1,11 @@
-from ai_agent_toolbox import FlatXMLParser, FlatXMLPromptFormatter, Toolbox
+from ai_agent_toolbox import Toolbox, XMLParser, XMLPromptFormatter
 from examples.util import r1_llm_call
 from pprint import pprint
 
 # Setup
 toolbox = Toolbox()
-parser = FlatXMLParser("think")
-formatter = FlatXMLPromptFormatter(tag="think")
+parser = XMLParser(tag="tool")
+formatter = XMLPromptFormatter(tag="tool")
 
 # Add tools to your toolbox
 # Single required argument passed positionally
@@ -16,7 +16,7 @@ toolbox.add_tool(
     name="think",
     fn=think,
     args={
-        # FlatXMLParser only takes a single string as an argument
+        # XMLParser reads named arguments from XML tags.
         "content": {
             "type": "string",
             "description": "Anything you want to think about"

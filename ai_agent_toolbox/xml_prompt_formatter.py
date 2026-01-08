@@ -1,6 +1,6 @@
 from typing import Dict
 
-from ai_agent_toolbox.formatters.prompt_formatter import (
+from ai_agent_toolbox.prompt_formatter import (
     PromptFormatter,
     iter_tool_metadata,
 )
@@ -48,4 +48,3 @@ class XMLPromptFormatter(PromptFormatter):
             lines.append("")
 
         return "\n".join(lines)
-

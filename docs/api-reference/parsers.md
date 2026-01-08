@@ -45,38 +45,6 @@ class XMLParser:
 ]
 ```
 
-## FlatXMLParser
-
-```python
-class FlatXMLParser:
-    """
-    Fast parser for simple XML tags without nesting
-    
-    Parameters:
-        *tags (str): Variable list of tags to capture (e.g. "think", "action")
-    
-    Methods:
-        parse(text: str) -> List[ParserEvent]
-            Parse complete text with recognized tags
-    """
-```
-
-### Example Usage
-```python
-from ai_agent_toolbox import FlatXMLParser
-parser = FlatXMLParser("search")
-events = parser.parse("<search>AI news</search>")
-```
-
-### Example Output
-```python
-[
-    ParserEvent(type='tool', mode='create', id='8b62426a-9bca-40e0-a9da-b2a57c6e3ba3', tool=None, is_tool_call=False, content=None),
-    ParserEvent(type='tool', mode='append', id='8b62426a-9bca-40e0-a9da-b2a57c6e3ba3', tool=None, is_tool_call=False, content='AI news'),
-    ParserEvent(type='tool', mode='close', id='8b62426a-9bca-40e0-a9da-b2a57c6e3ba3', tool=ToolUse(name='search', args={'content': 'AI news'}), is_tool_call=True, content='AI news')
-]
-```
-
 ## ParserEvent
 
 ```python
