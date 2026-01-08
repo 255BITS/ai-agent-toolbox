@@ -1,4 +1,4 @@
-from ai_agent_toolbox import Toolbox, FlatXMLParser, FlatXMLPromptFormatter
+from ai_agent_toolbox import Toolbox, XMLParser, XMLPromptFormatter
 from examples.util import anthropic_llm_call
 
 # This example shows a write-only Tool(no feedback) writing to an environment. The state of the Environment is shared with the LLM.
@@ -20,8 +20,8 @@ MAX_ITEMS = 3
 
 # Set up agent components
 toolbox = Toolbox()
-parser = FlatXMLParser("add_item")  # Watch for <add_item> tags
-formatter = FlatXMLPromptFormatter(tag="add_item")
+parser = XMLParser(tag="tool")  # Watch for <tool> blocks with <name>add_item</name>
+formatter = XMLPromptFormatter(tag="tool")
 
 # Define and register the write-only tool
 def add_item(content: str):

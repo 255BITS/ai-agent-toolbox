@@ -3,7 +3,7 @@ from typing import Optional, List, Dict
 from ai_agent_toolbox.parser_event import ParserEvent
 from ai_agent_toolbox.tool_use import ToolUse
 
-from .tool_parser_state import ToolParserState
+from ai_agent_toolbox.tool_parser_state import ToolParserState
 
 class ToolParser:
     """
