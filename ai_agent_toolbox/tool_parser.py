@@ -241,20 +241,22 @@ class ToolParser:
             )
         )
 
+    def _flush_arg_chunks(self) -> None:
+        """Flush accumulated chunks into current_tool_args."""
+        if not self.current_arg_name:
+            return
+        chunks = self._arg_chunks.pop(self.current_arg_name, None)
+        if chunks:
+            existing = self.current_tool_args.get(self.current_arg_name, "")
+            self.current_tool_args[self.current_arg_name] = existing + "".join(chunks)
+
     def _start_tool_arg(self, arg_name: str) -> None:
-        # Close previous arg's chunks before starting new one
-        if self.current_arg_name:
-            chunks = self._arg_chunks.pop(self.current_arg_name, None)
-            if chunks:
-                new_content = "".join(chunks)
-                existing = self.current_tool_args.get(self.current_arg_name, "")
-                self.current_tool_args[self.current_arg_name] = existing + new_content
+        self._flush_arg_chunks()
         self.current_arg_name = arg_name
 
     def _append_tool_arg(self, text: str) -> None:
         if not (self.current_tool_id and self.current_arg_name and text):
             return
-        # Collect chunks in list (O(1) append vs O(n) string concat)
         self._arg_chunks.setdefault(self.current_arg_name, []).append(text)
         self.events.append(
             ParserEvent(
@@ -267,12 +269,7 @@ class ToolParser:
         )
 
     def _close_tool_arg(self) -> None:
-        if self.current_arg_name:
-            chunks = self._arg_chunks.pop(self.current_arg_name, None)
-            if chunks:
-                new_content = "".join(chunks)
-                existing = self.current_tool_args.get(self.current_arg_name, "")
-                self.current_tool_args[self.current_arg_name] = existing + new_content
+        self._flush_arg_chunks()
         self.current_arg_name = None
 
     def _finalize_tool(self) -> None:
