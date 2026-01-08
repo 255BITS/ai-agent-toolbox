@@ -207,25 +207,20 @@ class Toolbox:
 
     @staticmethod
     def _validate_value(value: Any, arg_schema: Dict[str, Any]) -> None:
-        if "choices" in arg_schema:
-            choices = arg_schema["choices"]
-            if value not in choices:
-                raise ValueError(f"Value {value!r} not in allowed choices: {choices!r}")
-        if "min" in arg_schema:
-            min_value = arg_schema["min"]
+        choices = arg_schema.get("choices")
+        if choices is not None and value not in choices:
+            raise ValueError(f"Value {value!r} not in allowed choices: {choices!r}")
+        min_value = arg_schema.get("min")
+        if min_value is not None:
             try:
                 if value < min_value:
                     raise ValueError(f"Value {value!r} is less than minimum {min_value!r}")
             except TypeError as exc:
-                raise TypeError(
-                    f"Cannot compare value {value!r} with minimum {min_value!r}"
-                ) from exc
-        if "max" in arg_schema:
-            max_value = arg_schema["max"]
+                raise TypeError(f"Cannot compare value {value!r} with minimum {min_value!r}") from exc
+        max_value = arg_schema.get("max")
+        if max_value is not None:
             try:
                 if value > max_value:
                     raise ValueError(f"Value {value!r} exceeds maximum {max_value!r}")
             except TypeError as exc:
-                raise TypeError(
-                    f"Cannot compare value {value!r} with maximum {max_value!r}"
-                ) from exc
+                raise TypeError(f"Cannot compare value {value!r} with maximum {max_value!r}") from exc
