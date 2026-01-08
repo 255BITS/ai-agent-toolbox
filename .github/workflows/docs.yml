@@ -5,6 +5,10 @@ on:
     branches:
       - main  # Adjust if needed
 
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
 permissions:
   contents: read
   pages: write
