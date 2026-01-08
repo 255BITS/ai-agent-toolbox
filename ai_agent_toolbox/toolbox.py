@@ -2,10 +2,9 @@ from __future__ import annotations
 
 import inspect
 import json
-from typing import Any, Callable, Dict, List, Optional, Type, Union
+from typing import Any, Callable, Dict, Optional, Union
 
 from .parser_event import ParserEvent
-from .tool_use import ToolUse
 from .tool_response import ToolResponse
 
 # Type alias for argument schema: can be a string like "int" or a dict with type/description/etc
