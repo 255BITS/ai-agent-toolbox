@@ -15,6 +15,21 @@ ArgSchema = Union[str, Dict[str, Any]]
 _TRUTHY = frozenset(("true", "1", "yes", "y", "on"))
 _FALSY = frozenset(("false", "0", "no", "n", "off"))
 
+
+def _coerce_bool(value: Any) -> bool:
+    """Coerce value to bool with string parsing."""
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        return bool(value)
+    if isinstance(value, str):
+        lowered = value.strip().lower()
+        if lowered in _TRUTHY:
+            return True
+        if lowered in _FALSY:
+            return False
+    raise ValueError(f"Cannot convert value {value!r} to bool")
+
 class ToolConflictError(Exception):
     """Raised when trying to register a tool name that already exists."""
 
@@ -143,35 +158,24 @@ class Toolbox:
 
         return converted
 
-    @staticmethod
-    def _coerce_type(value: Any, arg_type: str) -> Any:
-        if arg_type == "int":
-            return int(value)
-        if arg_type == "float":
-            return float(value)
-        if arg_type == "bool":
-            if isinstance(value, bool):
-                return value
-            if isinstance(value, (int, float)):
-                return bool(value)
-            if isinstance(value, str):
-                lowered = value.strip().lower()
-                if lowered in _TRUTHY:
-                    return True
-                if lowered in _FALSY:
-                    return False
-            raise ValueError(f"Cannot convert value {value!r} to bool")
+    # Type coercion dispatch table - O(1) lookup vs if-chain
+    _COERCERS: Dict[str, Callable[[Any], Any]] = {
+        "int": int,
+        "float": float,
+        "bool": _coerce_bool,
+        "string": lambda v: v if isinstance(v, str) else str(v),
+    }
+
+    @classmethod
+    def _coerce_type(cls, value: Any, arg_type: str) -> Any:
         if arg_type == "list":
-            return Toolbox._load_json_container(value, list)
+            return cls._load_json_container(value, list)
         if arg_type == "dict":
-            return Toolbox._load_json_container(value, dict)
+            return cls._load_json_container(value, dict)
         if arg_type == "enum":
-            return Toolbox._maybe_parse_json(value)
-        if arg_type == "string":
-            if isinstance(value, str):
-                return value
-            return str(value)
-        return value
+            return cls._maybe_parse_json(value)
+        coercer = cls._COERCERS.get(arg_type)
+        return coercer(value) if coercer else value
 
     @staticmethod
     def _maybe_parse_json(value: Any) -> Any:
