@@ -11,6 +11,10 @@ from .tool_response import ToolResponse
 # Type alias for argument schema: can be a string like "int" or a dict with type/description/etc
 ArgSchema = Union[str, Dict[str, Any]]
 
+# Bool coercion constants
+_TRUTHY = frozenset(("true", "1", "yes", "y", "on"))
+_FALSY = frozenset(("false", "0", "no", "n", "off"))
+
 class ToolConflictError(Exception):
     """Raised when trying to register a tool name that already exists."""
 
@@ -152,9 +156,9 @@ class Toolbox:
                 return bool(value)
             if isinstance(value, str):
                 lowered = value.strip().lower()
-                if lowered in ("true", "1", "yes", "y", "on"):
+                if lowered in _TRUTHY:
                     return True
-                if lowered in ("false", "0", "no", "n", "off"):
+                if lowered in _FALSY:
                     return False
             raise ValueError(f"Cannot convert value {value!r} to bool")
         if arg_type == "list":
