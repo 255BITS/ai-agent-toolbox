@@ -1,5 +1,9 @@
+from __future__ import annotations
+
 from typing import List
+
 from ai_agent_toolbox.parser_event import ParserEvent
+
 
 class Parser:
     def parse(self, text: str) -> List[ParserEvent]:

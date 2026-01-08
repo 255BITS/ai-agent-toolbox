@@ -106,7 +106,11 @@ class PromptFormatter:
 
         raise NotImplementedError
 
-    def usage_prompt(self, toolbox) -> str:
-        """Generate a usage prompt from a Toolbox instance."""
+    def usage_prompt(self, toolbox: Any) -> str:
+        """Generate a usage prompt from a Toolbox instance.
+
+        Args:
+            toolbox: A Toolbox instance with a _tools attribute.
+        """
 
         return self.format_prompt(toolbox._tools)

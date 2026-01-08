@@ -1,19 +1,23 @@
-from typing import Dict
+from __future__ import annotations
+
+from typing import Any, Dict, Mapping
 
 from ai_agent_toolbox.prompt_formatter import (
     PromptFormatter,
     iter_tool_metadata,
 )
 
+
 class XMLPromptFormatter(PromptFormatter):
     """
     Formats tool usage prompts in XML format, compatible with XMLParser.
     Assumes the use of <tool>, <name>, <argName> XML tags.
     """
-    def __init__(self, tag="tool"):
+
+    def __init__(self, tag: str = "tool") -> None:
         self.tag = tag
 
-    def format_prompt(self, tools: Dict[str, Dict[str, str]]) -> str:
+    def format_prompt(self, tools: Mapping[str, Mapping[str, Any]]) -> str:
         lines = [f"You can invoke the following tools using <{self.tag}>:"]
 
         tool_metadata = list(iter_tool_metadata(tools))

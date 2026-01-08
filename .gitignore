@@ -1,2 +1,19 @@
 **/*.pyc
 .claude/
+
+# Build artifacts
+dist/
+*.egg-info/
+build/
+
+# Temp/scratch files
+*.patch
+prompt.txt
+git.apply
+
+# Example outputs
+examples/data/
+examples/output/
+
+# Worktrees
+worktrees/

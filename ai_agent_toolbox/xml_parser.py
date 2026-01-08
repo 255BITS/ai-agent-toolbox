@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import List
 
 from ai_agent_toolbox.tool_parser import ToolParser
@@ -14,11 +16,11 @@ class ParserState:
 class XMLParser(Parser):
     """
     Accumulates text until <use_tool>, then delegates to ToolParser.
-    Once we detect <use_tool>, we shift into INSIDE_TOOL state and feed 
+    Once we detect <use_tool>, we shift into INSIDE_TOOL state and feed
     chunks to our ToolParser until it signals completion or we run out of data.
     """
 
-    def __init__(self, tag="tool"):
+    def __init__(self, tag: str = "tool") -> None:
         self.state = ParserState.OUTSIDE
         self.events: List[ParserEvent] = []
         self.text_stream: TextEventStream = TextEventStream(
@@ -41,7 +43,7 @@ class XMLParser(Parser):
 
         return self.events
 
-    def _handle_outside(self, chunk: str):
+    def _handle_outside(self, chunk: str) -> None:
         combined = self.outside_buffer + chunk
         self.outside_buffer = ""
 
@@ -81,7 +83,7 @@ class XMLParser(Parser):
                 self.outside_buffer = leftover
                 return
 
-    def _handle_inside_tool(self, chunk: str):
+    def _handle_inside_tool(self, chunk: str) -> None:
         # We are in the middle of a tool parse
         if not self.tool_parser:
             return
@@ -99,7 +101,8 @@ class XMLParser(Parser):
             # Still not done, accumulate leftover for the next chunk
             self.outside_buffer = leftover
 
-    def _partial_prefix(self, text: str, pattern: str) -> str:
+    @staticmethod
+    def _partial_prefix(text: str, pattern: str) -> str:
         """
         Check if the end of 'text' is a prefix of 'pattern'.
         E.g. if text ends with "<us" and pattern is "<use_tool>", 
@@ -111,13 +114,13 @@ class XMLParser(Parser):
                 return text[-size:]
         return ""
 
-    def _stream_outside_text(self, text: str):
+    def _stream_outside_text(self, text: str) -> None:
         self.text_stream.stream(text)
 
-    def _open_text_block(self):
+    def _open_text_block(self) -> None:
         self.text_stream.open()
 
-    def _close_text_block(self):
+    def _close_text_block(self) -> None:
         self.text_stream.close()
 
     def flush(self) -> List[ParserEvent]:
@@ -162,7 +165,7 @@ class XMLParser(Parser):
         finally:
             self.events = previous_events
 
-    def _finalize_tool_parser(self, flush_events: List[ParserEvent]):
+    def _finalize_tool_parser(self, flush_events: List[ParserEvent]) -> None:
         # Force-close partial tool usage if it's not fully done
         if self.tool_parser and not self.tool_parser.is_done():
             # Manually finalize

@@ -1,20 +1,50 @@
+from __future__ import annotations
+
 import inspect
 import json
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, List, Optional, Type, Union
 
 from .parser_event import ParserEvent
 from .tool_use import ToolUse
 from .tool_response import ToolResponse
 
+# Type alias for argument schema: can be a string like "int" or a dict with type/description/etc
+ArgSchema = Union[str, Dict[str, Any]]
+
 class ToolConflictError(Exception):
-    """Raised when trying to register a tool name that already exists"""
+    """Raised when trying to register a tool name that already exists."""
+
     pass
 
+
+class ToolArgumentError(ValueError):
+    """Raised when a tool argument fails type conversion or validation.
+
+    Inherits from ValueError for backwards compatibility with code that
+    catches ValueError for validation errors.
+
+    Attributes:
+        tool_name: The name of the tool being invoked.
+        arg_name: The name of the argument that failed.
+        message: Description of what went wrong.
+    """
+
+    def __init__(self, tool_name: str, arg_name: str, message: str) -> None:
+        self.tool_name = tool_name
+        self.arg_name = arg_name
+        super().__init__(f"Tool '{tool_name}' argument '{arg_name}': {message}")
+
 class Toolbox:
-    def __init__(self):
+    def __init__(self) -> None:
         self._tools: Dict[str, Dict[str, Any]] = {}
 
-    def add_tool(self, name: str, fn: Callable, args: Dict, description: str = ""):
+    def add_tool(
+        self,
+        name: str,
+        fn: Callable[..., Any],
+        args: Dict[str, ArgSchema],
+        description: str = "",
+    ) -> None:
         if name in self._tools:
             raise ToolConflictError(f"Tool {name} already registered")
 
@@ -55,8 +85,8 @@ class Toolbox:
             result=tool_result
         )
 
-    def _get_tool_data(self, event: ParserEvent) -> Optional[Dict]:
-        """Shared validation and argument processing"""
+    def _get_tool_data(self, event: ParserEvent) -> Optional[Dict[str, Any]]:
+        """Shared validation and argument processing."""
         if not event.is_tool_call or not event.tool:
             return None
 
@@ -65,16 +95,19 @@ class Toolbox:
             return None
 
         tool_data = {**self._tools[tool_name]}  # Shallow copy
-        processed_args = {}
-        
+        processed_args: Dict[str, Any] = {}
+
         for arg_name, arg_schema in tool_data["args"].items():
             if arg_name not in event.tool.args:
-                print("Could not find argument", arg_name)
+                # Argument not provided - skip it (allows optional arguments)
                 continue
 
             raw_value = event.tool.args[arg_name]
             schema_dict = self._normalize_arg_schema(arg_schema)
-            processed_args[arg_name] = self._convert_arg(raw_value, schema_dict)
+            try:
+                processed_args[arg_name] = self._convert_arg(raw_value, schema_dict)
+            except (ValueError, TypeError) as exc:
+                raise ToolArgumentError(tool_name, arg_name, str(exc)) from exc
 
         tool_data["processed_args"] = processed_args
         return tool_data

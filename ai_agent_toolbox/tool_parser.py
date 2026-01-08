@@ -1,9 +1,20 @@
+from __future__ import annotations
+
 import uuid
-from typing import Optional, List, Dict
+from typing import Dict, List, Optional, Tuple
+
 from ai_agent_toolbox.parser_event import ParserEvent
 from ai_agent_toolbox.tool_use import ToolUse
-
 from ai_agent_toolbox.tool_parser_state import ToolParserState
+
+
+class ToolParseError(ValueError):
+    """Raised when tool XML parsing fails.
+
+    Inherits from ValueError for backwards compatibility.
+    """
+
+    pass
 
 class ToolParser:
     """
@@ -22,7 +33,7 @@ class ToolParser:
       - leftover text not consumed in this parse
     """
 
-    def __init__(self, tag: str):
+    def __init__(self, tag: str) -> None:
         self.state = ToolParserState.WAITING_FOR_NAME
         self.buffer: str = ""
         self.events: List[ParserEvent] = []
@@ -37,7 +48,7 @@ class ToolParser:
         self.current_arg_name: Optional[str] = None
         self.current_tool_args: Dict[str, str] = {}
 
-    def parse(self, chunk: str) -> (List[ParserEvent], bool, str):
+    def parse(self, chunk: str) -> Tuple[List[ParserEvent], bool, str]:
         """
         Parse the incoming chunk of text according to our current state.
         Returns (events, done, leftover).
@@ -71,7 +82,7 @@ class ToolParser:
 
         return self.events, done, leftover
 
-    def _parse_waiting_for_name(self):
+    def _parse_waiting_for_name(self) -> None:
         """
         Look for a complete <name>...</name> block. If not found, and if the tool block
         has ended (i.e. </use_tool> is present), then discard the tool block as invalid.
@@ -107,7 +118,7 @@ class ToolParser:
         self._create_tool(name_text)
         self.state = ToolParserState.HAS_NAME
 
-    def _parse_has_name(self):
+    def _parse_has_name(self) -> None:
         """
         We have the tool's name. We now look for either:
           - argument tags: <argName>...</argName>
@@ -135,7 +146,7 @@ class ToolParser:
                 # Put back the leftover + the end tag portion
                 self.buffer = leftover + self.buffer[close_pos:]
 
-    def _parse_tool_arguments(self, text: str) -> int:
+    def _parse_tool_arguments(self, text: str) -> int:  # noqa: C901
         """
         Parse argument data in `text` and return how many characters we fully consumed.
         Once we see <argName>, we read all text (including nested '<') until </argName>.
@@ -214,9 +225,12 @@ class ToolParser:
 
         return i
 
-    def _create_tool(self, name: str):
+    def _create_tool(self, name: str) -> None:
         if not name:
-            raise ValueError("Tool name is required")
+            raise ToolParseError(
+                f"Tool <name> tag is empty or missing. "
+                f"Expected: <{self.tag}><name>tool_name</name>...</{self.tag}>"
+            )
 
         self.current_tool_id = str(uuid.uuid4())
         self.current_tool_name = name
@@ -233,12 +247,12 @@ class ToolParser:
             )
         )
 
-    def _start_tool_arg(self, arg_name: str):
+    def _start_tool_arg(self, arg_name: str) -> None:
         # Close any prior arg
         self._close_tool_arg()
         self.current_arg_name = arg_name
 
-    def _append_tool_arg(self, text: str):
+    def _append_tool_arg(self, text: str) -> None:
         if self.current_tool_id and self.current_arg_name and text:
             # Accumulate in our dictionary
             if self.current_arg_name not in self.current_tool_args:
@@ -257,10 +271,10 @@ class ToolParser:
                 )
             )
 
-    def _close_tool_arg(self):
+    def _close_tool_arg(self) -> None:
         self.current_arg_name = None
 
-    def _finalize_tool(self):
+    def _finalize_tool(self) -> None:
         """Emit a close event with the final tool usage."""
         self._close_tool_arg()
         if self.current_tool_id:
