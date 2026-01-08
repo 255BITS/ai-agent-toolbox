@@ -241,8 +241,6 @@ class ToolParser:
         )
 
     def _start_tool_arg(self, arg_name: str) -> None:
-        # Close any prior arg
-        self._close_tool_arg()
         self.current_arg_name = arg_name
 
     def _append_tool_arg(self, text: str) -> None:
