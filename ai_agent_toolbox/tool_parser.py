@@ -47,6 +47,7 @@ class ToolParser:
         self.current_tool_name: Optional[str] = None
         self.current_arg_name: Optional[str] = None
         self.current_tool_args: Dict[str, str] = {}
+        self._arg_chunks: Dict[str, List[str]] = {}  # Collect chunks, join on close
 
     def parse(self, chunk: str) -> Tuple[List[ParserEvent], bool, str]:
         """
@@ -241,28 +242,36 @@ class ToolParser:
         )
 
     def _start_tool_arg(self, arg_name: str) -> None:
+        # Close previous arg's chunks before starting new one
+        if self.current_arg_name and self.current_arg_name in self._arg_chunks:
+            chunks = self._arg_chunks.pop(self.current_arg_name)
+            new_content = "".join(chunks)
+            existing = self.current_tool_args.get(self.current_arg_name, "")
+            self.current_tool_args[self.current_arg_name] = existing + new_content
         self.current_arg_name = arg_name
 
     def _append_tool_arg(self, text: str) -> None:
-        if self.current_tool_id and self.current_arg_name and text:
-            # Accumulate in our dictionary
-            if self.current_arg_name not in self.current_tool_args:
-                self.current_tool_args[self.current_arg_name] = text
-            else:
-                self.current_tool_args[self.current_arg_name] += text
-
-            # Also emit an append event showing the partial chunk
-            self.events.append(
-                ParserEvent(
-                    type="tool",
-                    mode="append",
-                    id=self.current_tool_id,
-                    is_tool_call=False,
-                    content=text
-                )
+        if not (self.current_tool_id and self.current_arg_name and text):
+            return
+        # Collect chunks in list (O(1) append vs O(n) string concat)
+        self._arg_chunks.setdefault(self.current_arg_name, []).append(text)
+        self.events.append(
+            ParserEvent(
+                type="tool",
+                mode="append",
+                id=self.current_tool_id,
+                is_tool_call=False,
+                content=text
             )
+        )
 
     def _close_tool_arg(self) -> None:
+        if self.current_arg_name and self.current_arg_name in self._arg_chunks:
+            chunks = self._arg_chunks.pop(self.current_arg_name)
+            new_content = "".join(chunks)
+            # Append to existing content if arg was seen before
+            existing = self.current_tool_args.get(self.current_arg_name, "")
+            self.current_tool_args[self.current_arg_name] = existing + new_content
         self.current_arg_name = None
 
     def _finalize_tool(self) -> None:
@@ -284,6 +293,7 @@ class ToolParser:
         self.current_tool_id = None
         self.current_tool_name = None
         self.current_tool_args = {}
+        self._arg_chunks = {}
 
     def is_done(self) -> bool:
         return self.state == ToolParserState.DONE
