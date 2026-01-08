@@ -8,13 +8,13 @@ version = "1.0.1"
 description = "An easy to use framework for adding tool use to AI agents."
 readme = "README.md"
 requires-python = ">=3.7"
-license = { file = "LICENSE" }
+license = "MIT"
+license-files = ["LICENSE"]
 authors = [
     { name = "255labs.xyz", email = "martyn@255bits.com" },
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
 dependencies = []
@@ -26,7 +26,6 @@ dev = ["pytest"]
 Homepage = "https://github.com/255BITS/ai-agent-toolbox"
 
 [tool.setuptools]
-license-files = []
 include-package-data = true
 
 [tool.setuptools.packages.find]
