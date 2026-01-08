@@ -203,24 +203,17 @@ class ToolParser:
                 # Start a new argument
                 self._start_tool_arg(arg_name)
 
-                # Now we want to read everything until we find the matching </arg_name>.
-                end_tag = f"</{arg_name}>"
-                end_pos = text.find(end_tag, i)
+                # Find matching </arg_name>
+                end_pos = text.find(f"</{arg_name}>", i)
                 if end_pos == -1:
-                    # We don't yet have the closing tag -> partial parse
-                    # Everything from i to the end is argument text
-                    inner_text = text[i:]
-                    self._append_tool_arg(inner_text)
-                    i = length  # done reading this chunk
+                    # Partial: consume rest as arg text
+                    self._append_tool_arg(text[i:])
+                    i = length
                     break
                 else:
-                    # We found the matching closing tag.
-                    # Everything from i up to end_pos is the argument content.
-                    inner_text = text[i:end_pos]
-                    self._append_tool_arg(inner_text)
-                    # Now move past `</arg_name>` 
-                    i = end_pos + len(end_tag)
-                    # And close the argument
+                    # Full: extract content, skip past </arg_name>
+                    self._append_tool_arg(text[i:end_pos])
+                    i = end_pos + len(arg_name) + 3  # len("</" + arg_name + ">")
                     self._close_tool_arg()
 
         return i
