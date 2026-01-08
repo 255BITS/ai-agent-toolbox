@@ -196,17 +196,16 @@ class ToolParser:
                 # Start a new argument
                 self._start_tool_arg(arg_name)
 
-                # Find matching </arg_name>
-                end_pos = text.find(f"</{arg_name}>", i)
+                # Find matching close tag
+                close_tag = f"</{arg_name}>"
+                end_pos = text.find(close_tag, i)
                 if end_pos == -1:
-                    # Partial: consume rest as arg text
                     self._append_tool_arg(text[i:])
                     i = length
                     break
                 else:
-                    # Full: extract content, skip past </arg_name>
                     self._append_tool_arg(text[i:end_pos])
-                    i = end_pos + len(arg_name) + 3  # len("</" + arg_name + ">")
+                    i = end_pos + len(close_tag)
                     self._close_tool_arg()
 
         return i
