@@ -7,6 +7,10 @@ from ai_agent_toolbox.parser_event import ParserEvent
 from ai_agent_toolbox.tool_use import ToolUse
 from ai_agent_toolbox.tool_parser_state import ToolParserState
 
+# Name tag constants
+_NAME_START = "<name>"
+_NAME_END = "</name>"
+
 
 class ToolParseError(ValueError):
     """Raised when tool XML parsing fails.
@@ -47,6 +51,7 @@ class ToolParser:
         self.current_tool_name: Optional[str] = None
         self.current_arg_name: Optional[str] = None
         self.current_tool_args: Dict[str, str] = {}
+        self._arg_chunks: Dict[str, List[str]] = {}  # Collect chunks, join on close
 
     def parse(self, chunk: str) -> Tuple[List[ParserEvent], bool, str]:
         """
@@ -83,35 +88,23 @@ class ToolParser:
         return self.events, done, leftover
 
     def _parse_waiting_for_name(self) -> None:
-        """
-        Look for a complete <name>...</name> block. If not found, and if the tool block
-        has ended (i.e. </use_tool> is present), then discard the tool block as invalid.
-        """
-        start_tag = "<name>"
-        end_tag = "</name>"
-
-        start_idx = self.buffer.find(start_tag)
+        """Look for <name>...</name>. Discard block if tool ends without name."""
+        start_idx = self.buffer.find(_NAME_START)
         if start_idx == -1:
-            # No <name> tag found.
-            # If the end tag for the tool is present, discard the invalid tool block.
+            # No <name> found; discard block if tool end tag present
             end_tool_idx = self.buffer.find(self.end_tag)
             if end_tool_idx != -1:
-                # Discard everything up to and including the end tag.
                 self.buffer = self.buffer[end_tool_idx + len(self.end_tag):]
                 self.state = ToolParserState.DONE
             return
 
-        close_idx = self.buffer.find(end_tag, start_idx + len(start_tag))
+        close_idx = self.buffer.find(_NAME_END, start_idx + len(_NAME_START))
         if close_idx == -1:
-            # Not complete yet. Possibly partial.
-            return
+            return  # Partial, wait for more data
 
-        # We have a complete <name>...</name>.
-        name_text_start = start_idx + len(start_tag)
+        name_text_start = start_idx + len(_NAME_START)
         name_text = self.buffer[name_text_start:close_idx].strip()
-
-        # Remove this block from the buffer
-        end_of_block = close_idx + len(end_tag)
+        end_of_block = close_idx + len(_NAME_END)
         self.buffer = self.buffer[end_of_block:]
 
         # Create the tool
@@ -203,24 +196,16 @@ class ToolParser:
                 # Start a new argument
                 self._start_tool_arg(arg_name)
 
-                # Now we want to read everything until we find the matching </arg_name>.
-                end_tag = f"</{arg_name}>"
-                end_pos = text.find(end_tag, i)
+                # Find matching close tag
+                close_tag = f"</{arg_name}>"
+                end_pos = text.find(close_tag, i)
                 if end_pos == -1:
-                    # We don't yet have the closing tag -> partial parse
-                    # Everything from i to the end is argument text
-                    inner_text = text[i:]
-                    self._append_tool_arg(inner_text)
-                    i = length  # done reading this chunk
+                    self._append_tool_arg(text[i:])
+                    i = length
                     break
                 else:
-                    # We found the matching closing tag.
-                    # Everything from i up to end_pos is the argument content.
-                    inner_text = text[i:end_pos]
-                    self._append_tool_arg(inner_text)
-                    # Now move past `</arg_name>` 
-                    i = end_pos + len(end_tag)
-                    # And close the argument
+                    self._append_tool_arg(text[i:end_pos])
+                    i = end_pos + len(close_tag)
                     self._close_tool_arg()
 
         return i
@@ -247,31 +232,35 @@ class ToolParser:
             )
         )
 
+    def _flush_arg_chunks(self) -> None:
+        """Flush accumulated chunks into current_tool_args."""
+        if not self.current_arg_name:
+            return
+        chunks = self._arg_chunks.pop(self.current_arg_name, None)
+        if chunks:
+            existing = self.current_tool_args.get(self.current_arg_name, "")
+            self.current_tool_args[self.current_arg_name] = existing + "".join(chunks)
+
     def _start_tool_arg(self, arg_name: str) -> None:
-        # Close any prior arg
-        self._close_tool_arg()
+        self._flush_arg_chunks()
         self.current_arg_name = arg_name
 
     def _append_tool_arg(self, text: str) -> None:
-        if self.current_tool_id and self.current_arg_name and text:
-            # Accumulate in our dictionary
-            if self.current_arg_name not in self.current_tool_args:
-                self.current_tool_args[self.current_arg_name] = text
-            else:
-                self.current_tool_args[self.current_arg_name] += text
-
-            # Also emit an append event showing the partial chunk
-            self.events.append(
-                ParserEvent(
-                    type="tool",
-                    mode="append",
-                    id=self.current_tool_id,
-                    is_tool_call=False,
-                    content=text
-                )
+        if not (self.current_tool_id and self.current_arg_name and text):
+            return
+        self._arg_chunks.setdefault(self.current_arg_name, []).append(text)
+        self.events.append(
+            ParserEvent(
+                type="tool",
+                mode="append",
+                id=self.current_tool_id,
+                is_tool_call=False,
+                content=text
             )
+        )
 
     def _close_tool_arg(self) -> None:
+        self._flush_arg_chunks()
         self.current_arg_name = None
 
     def _finalize_tool(self) -> None:
@@ -293,6 +282,7 @@ class ToolParser:
         self.current_tool_id = None
         self.current_tool_name = None
         self.current_tool_args = {}
+        self._arg_chunks = {}
 
     def is_done(self) -> bool:
         return self.state == ToolParserState.DONE

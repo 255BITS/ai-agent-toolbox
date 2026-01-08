@@ -33,3 +33,7 @@ jobs:
       # Step 4: Run pytest
       - name: Run tests
         run: pytest
+
+      # Step 5: Run benchmarks
+      - name: Run benchmarks
+        run: python benchmarks/parsing.py

@@ -9,9 +9,6 @@ from ai_agent_toolbox.parser_event import ParserEvent
 from ai_agent_toolbox.tool_use import ToolUse
 from ai_agent_toolbox.parser_utils import TextEventStream
 
-class ParserState:
-    OUTSIDE = "outside"
-    INSIDE_TOOL = "inside_tool"
 
 class XMLParser(Parser):
     """
@@ -21,7 +18,7 @@ class XMLParser(Parser):
     """
 
     def __init__(self, tag: str = "tool") -> None:
-        self.state = ParserState.OUTSIDE
+        self._inside_tool: bool = False
         self.events: List[ParserEvent] = []
         self.text_stream: TextEventStream = TextEventStream(
             lambda event: self.events.append(event)
@@ -35,12 +32,10 @@ class XMLParser(Parser):
 
     def parse_chunk(self, chunk: str) -> List[ParserEvent]:
         self.events = []
-
-        if self.state == ParserState.OUTSIDE:
-            self._handle_outside(chunk)
-        elif self.state == ParserState.INSIDE_TOOL:
+        if self._inside_tool:
             self._handle_inside_tool(chunk)
-
+        else:
+            self._handle_outside(chunk)
         return self.events
 
     def _handle_outside(self, chunk: str) -> None:
@@ -73,29 +68,24 @@ class XMLParser(Parser):
             self.events.extend(new_events)
 
             if done:
-                # If the tool parser is done, we reset it and remain OUTSIDE
+                # Tool parser done, reset and remain outside
                 self.tool_parser = ToolParser(tag=self.tag)
-                self.state = ParserState.OUTSIDE
+                self._inside_tool = False
                 combined = leftover
             else:
-                # If the tool parser isn't done, it means we have a partial tool block
-                self.state = ParserState.INSIDE_TOOL
+                # Partial tool block, switch to inside state
+                self._inside_tool = True
                 self.outside_buffer = leftover
                 return
 
     def _handle_inside_tool(self, chunk: str) -> None:
-        # We are in the middle of a tool parse
-        if not self.tool_parser:
-            return
-
         new_events, done, leftover = self.tool_parser.parse(chunk)
         self.events.extend(new_events)
 
         if done:
-            # Tool is done, revert to OUTSIDE
+            # Tool done, revert to outside and process leftover
             self.tool_parser = ToolParser(tag=self.tag)
-            self.state = ParserState.OUTSIDE
-            # The leftover might contain more outside text or new tools
+            self._inside_tool = False
             self._handle_outside(leftover)
         else:
             # Still not done, accumulate leftover for the next chunk
@@ -103,15 +93,11 @@ class XMLParser(Parser):
 
     @staticmethod
     def _partial_prefix(text: str, pattern: str) -> str:
-        """
-        Check if the end of 'text' is a prefix of 'pattern'.
-        E.g. if text ends with "<us" and pattern is "<use_tool>", 
-        we return "<us" to keep it in buffer as a partial match.
-        """
+        """Return suffix of text that is a prefix of pattern."""
         max_len = min(len(text), len(pattern) - 1)
         for size in range(max_len, 0, -1):
-            if pattern.startswith(text[-size:]):
-                return text[-size:]
+            if text.endswith(pattern[:size]):
+                return pattern[:size]
         return ""
 
     def _stream_outside_text(self, text: str) -> None:
@@ -134,29 +120,25 @@ class XMLParser(Parser):
         self.events = flush_events
 
         try:
-            # If we are outside the tool and have leftover text
-            if self.state == ParserState.OUTSIDE and self.outside_buffer.strip():
+            # Flush leftover outside text
+            if not self._inside_tool and self.outside_buffer.strip():
                 self._stream_outside_text(self.outside_buffer)
                 self.outside_buffer = ""
 
-            # Close any open text block
             self._close_text_block()
 
-            # If we are in the middle of a tool parse
-            if self.state == ParserState.INSIDE_TOOL:
+            # Handle partial tool parse
+            if self._inside_tool:
                 events, done, leftover = self.tool_parser.parse("")
                 flush_events.extend(events)
                 if not done:
-                    # If no valid tool was created (i.e. no <name> found), discard the tool block
                     if not self.tool_parser.current_tool_id:
-                        # Open a new text block to resume normal parsing; do not emit any tool events.
                         self._open_text_block()
                     else:
                         self._finalize_tool_parser(flush_events)
                 self.tool_parser = ToolParser(tag=self.tag)
-                self.state = ParserState.OUTSIDE
+                self._inside_tool = False
 
-                # If leftover text remains after closing the tool, handle it
                 if leftover.strip():
                     self._handle_outside(leftover)
                     self._close_text_block()

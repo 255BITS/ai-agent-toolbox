@@ -2,14 +2,32 @@ from __future__ import annotations
 
 import inspect
 import json
-from typing import Any, Callable, Dict, List, Optional, Type, Union
+from typing import Any, Callable, Dict, Optional, Union
 
 from .parser_event import ParserEvent
-from .tool_use import ToolUse
 from .tool_response import ToolResponse
 
 # Type alias for argument schema: can be a string like "int" or a dict with type/description/etc
 ArgSchema = Union[str, Dict[str, Any]]
+
+# Bool coercion constants
+_TRUTHY = frozenset(("true", "1", "yes", "y", "on"))
+_FALSY = frozenset(("false", "0", "no", "n", "off"))
+
+
+def _coerce_bool(value: Any) -> bool:
+    """Coerce value to bool with string parsing."""
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        return bool(value)
+    if isinstance(value, str):
+        lowered = value.strip().lower()
+        if lowered in _TRUTHY:
+            return True
+        if lowered in _FALSY:
+            return False
+    raise ValueError(f"Cannot convert value {value!r} to bool")
 
 class ToolConflictError(Exception):
     """Raised when trying to register a tool name that already exists."""
@@ -139,39 +157,24 @@ class Toolbox:
 
         return converted
 
-    @staticmethod
-    def _coerce_type(value: Any, arg_type: str) -> Any:
-        if arg_type == "int":
-            if isinstance(value, bool):
-                return int(value)
-            return int(value)
-        if arg_type == "float":
-            if isinstance(value, bool):
-                return float(int(value))
-            return float(value)
-        if arg_type == "bool":
-            if isinstance(value, bool):
-                return value
-            if isinstance(value, (int, float)):
-                return bool(value)
-            if isinstance(value, str):
-                lowered = value.strip().lower()
-                if lowered in ("true", "1", "yes", "y", "on"):
-                    return True
-                if lowered in ("false", "0", "no", "n", "off"):
-                    return False
-            raise ValueError(f"Cannot convert value {value!r} to bool")
+    # Type coercion dispatch table - O(1) lookup vs if-chain
+    _COERCERS: Dict[str, Callable[[Any], Any]] = {
+        "int": int,
+        "float": float,
+        "bool": _coerce_bool,
+        "string": lambda v: v if isinstance(v, str) else str(v),
+    }
+
+    @classmethod
+    def _coerce_type(cls, value: Any, arg_type: str) -> Any:
         if arg_type == "list":
-            return Toolbox._load_json_container(value, list)
+            return cls._load_json_container(value, list)
         if arg_type == "dict":
-            return Toolbox._load_json_container(value, dict)
+            return cls._load_json_container(value, dict)
         if arg_type == "enum":
-            return Toolbox._maybe_parse_json(value)
-        if arg_type == "string":
-            if isinstance(value, str):
-                return value
-            return str(value)
-        return value
+            return cls._maybe_parse_json(value)
+        coercer = cls._COERCERS.get(arg_type)
+        return coercer(value) if coercer else value
 
     @staticmethod
     def _maybe_parse_json(value: Any) -> Any:
@@ -203,25 +206,20 @@ class Toolbox:
 
     @staticmethod
     def _validate_value(value: Any, arg_schema: Dict[str, Any]) -> None:
-        if "choices" in arg_schema:
-            choices = arg_schema["choices"]
-            if value not in choices:
-                raise ValueError(f"Value {value!r} not in allowed choices: {choices!r}")
-        if "min" in arg_schema:
-            min_value = arg_schema["min"]
+        choices = arg_schema.get("choices")
+        if choices is not None and value not in choices:
+            raise ValueError(f"Value {value!r} not in allowed choices: {choices!r}")
+        min_value = arg_schema.get("min")
+        if min_value is not None:
             try:
                 if value < min_value:
                     raise ValueError(f"Value {value!r} is less than minimum {min_value!r}")
             except TypeError as exc:
-                raise TypeError(
-                    f"Cannot compare value {value!r} with minimum {min_value!r}"
-                ) from exc
-        if "max" in arg_schema:
-            max_value = arg_schema["max"]
+                raise TypeError(f"Cannot compare value {value!r} with minimum {min_value!r}") from exc
+        max_value = arg_schema.get("max")
+        if max_value is not None:
             try:
                 if value > max_value:
                     raise ValueError(f"Value {value!r} exceeds maximum {max_value!r}")
             except TypeError as exc:
-                raise TypeError(
-                    f"Cannot compare value {value!r} with maximum {max_value!r}"
-                ) from exc
+                raise TypeError(f"Cannot compare value {value!r} with maximum {max_value!r}") from exc
