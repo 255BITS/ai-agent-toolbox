@@ -79,10 +79,6 @@ class XMLParser(Parser):
                 return
 
     def _handle_inside_tool(self, chunk: str) -> None:
-        # We are in the middle of a tool parse
-        if not self.tool_parser:
-            return
-
         new_events, done, leftover = self.tool_parser.parse(chunk)
         self.events.extend(new_events)
 
