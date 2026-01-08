@@ -142,12 +142,8 @@ class Toolbox:
     @staticmethod
     def _coerce_type(value: Any, arg_type: str) -> Any:
         if arg_type == "int":
-            if isinstance(value, bool):
-                return int(value)
             return int(value)
         if arg_type == "float":
-            if isinstance(value, bool):
-                return float(int(value))
             return float(value)
         if arg_type == "bool":
             if isinstance(value, bool):
