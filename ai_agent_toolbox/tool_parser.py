@@ -7,6 +7,10 @@ from ai_agent_toolbox.parser_event import ParserEvent
 from ai_agent_toolbox.tool_use import ToolUse
 from ai_agent_toolbox.tool_parser_state import ToolParserState
 
+# Name tag constants
+_NAME_START = "<name>"
+_NAME_END = "</name>"
+
 
 class ToolParseError(ValueError):
     """Raised when tool XML parsing fails.
@@ -84,35 +88,23 @@ class ToolParser:
         return self.events, done, leftover
 
     def _parse_waiting_for_name(self) -> None:
-        """
-        Look for a complete <name>...</name> block. If not found, and if the tool block
-        has ended (i.e. </use_tool> is present), then discard the tool block as invalid.
-        """
-        start_tag = "<name>"
-        end_tag = "</name>"
-
-        start_idx = self.buffer.find(start_tag)
+        """Look for <name>...</name>. Discard block if tool ends without name."""
+        start_idx = self.buffer.find(_NAME_START)
         if start_idx == -1:
-            # No <name> tag found.
-            # If the end tag for the tool is present, discard the invalid tool block.
+            # No <name> found; discard block if tool end tag present
             end_tool_idx = self.buffer.find(self.end_tag)
             if end_tool_idx != -1:
-                # Discard everything up to and including the end tag.
                 self.buffer = self.buffer[end_tool_idx + len(self.end_tag):]
                 self.state = ToolParserState.DONE
             return
 
-        close_idx = self.buffer.find(end_tag, start_idx + len(start_tag))
+        close_idx = self.buffer.find(_NAME_END, start_idx + len(_NAME_START))
         if close_idx == -1:
-            # Not complete yet. Possibly partial.
-            return
+            return  # Partial, wait for more data
 
-        # We have a complete <name>...</name>.
-        name_text_start = start_idx + len(start_tag)
+        name_text_start = start_idx + len(_NAME_START)
         name_text = self.buffer[name_text_start:close_idx].strip()
-
-        # Remove this block from the buffer
-        end_of_block = close_idx + len(end_tag)
+        end_of_block = close_idx + len(_NAME_END)
         self.buffer = self.buffer[end_of_block:]
 
         # Create the tool
