@@ -8,6 +8,8 @@ AI Agent Toolbox makes AI tool usage across models and frameworks easy. For use 
 
 AI Agent Toolbox is meant to be stable, reliable, and easy to master.
 
+**18x faster than naive streaming parsers at scale** - True O(n) streaming parser, optimized for RL and agent loops. [See benchmarks](benchmarks/parsing.py)
+
 ## Features
 
 * Model provider-agnostic - supports Anthropic, OpenAI, Groq, NEAR AI, Ollama, Hyperbolic, NanoGPT, and more
