@@ -103,15 +103,11 @@ class XMLParser(Parser):
 
     @staticmethod
     def _partial_prefix(text: str, pattern: str) -> str:
-        """
-        Check if the end of 'text' is a prefix of 'pattern'.
-        E.g. if text ends with "<us" and pattern is "<use_tool>", 
-        we return "<us" to keep it in buffer as a partial match.
-        """
+        """Return suffix of text that is a prefix of pattern."""
         max_len = min(len(text), len(pattern) - 1)
         for size in range(max_len, 0, -1):
-            if pattern.startswith(text[-size:]):
-                return text[-size:]
+            if text.endswith(pattern[:size]):
+                return pattern[:size]
         return ""
 
     def _stream_outside_text(self, text: str) -> None:
