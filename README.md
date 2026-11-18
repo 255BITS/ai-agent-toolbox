@@ -291,3 +291,10 @@ MIT
 ## Credits
 
 AI Agent Toolbox is created and maintained by <a href="255labs.xyz">255labs.xyz</a>
+
+## GitHub source releases
+
+Update the package version in `pyproject.toml` in the release PR. When the version
+change reaches `main`, the distribution build and tests qualify the exact
+commit for a GitHub release tagged `v<version>`. PyPI publishing runs as a
+separate job.
