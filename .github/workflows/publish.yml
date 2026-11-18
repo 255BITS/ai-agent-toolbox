@@ -18,10 +18,13 @@ jobs:
     outputs:
       version: ${{ steps.registry.outputs.version }}
       publish: ${{ steps.registry.outputs.publish }}
+      source_version: ${{ steps.source.outputs.version }}
+      source_prerelease: ${{ steps.source.outputs.prerelease }}
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -34,6 +37,11 @@ jobs:
           python -m pip install "${wheels[0]}[dev]"
           python -m pytest
           python benchmarks/parsing.py
+      - name: Check the version change for GitHub Releases
+        id: source
+        env:
+          BEFORE_SHA: ${{ github.event_name == 'push' && github.event.before || '' }}
+        run: python .github/scripts/publish_source.py qualify --package ai-agent-toolbox >> "$GITHUB_OUTPUT"
       - name: Check the exact version on PyPI
         id: registry
         if: github.repository == '255BITS/ai-agent-toolbox' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
@@ -77,3 +85,29 @@ jobs:
       - uses: pypa/gh-action-pypi-publish@release/v1
         with:
           skip-existing: true
+
+  github-source:
+    name: Publish tested GitHub source release
+    needs: package
+    if: ${{ github.repository == '255BITS/ai-agent-toolbox' && github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.package.outputs.source_version != '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    concurrency:
+      group: github-source-${{ needs.package.outputs.source_version }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.11'
+      - name: Tag and release the tested source
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_VERSION: ${{ needs.package.outputs.source_version }}
+          SOURCE_PRERELEASE: ${{ needs.package.outputs.source_prerelease }}
+        run: |
+          python .github/scripts/publish_source.py publish --repository 255BITS/ai-agent-toolbox             --version "$SOURCE_VERSION" --prerelease "$SOURCE_PRERELEASE"
